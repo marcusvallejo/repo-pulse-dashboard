@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RepoPulse Dashboard</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <aside class="sidebar" aria-label="Main navigation">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">RP</div>
+        <div>
+          <p class="eyebrow">GitHub analytics</p>
+          <h1>RepoPulse</h1>
+        </div>
+      </div>
+
+      <nav class="nav-list">
+        <a class="active" href="#overview">Overview</a>
+        <a href="#pull-requests">Pull requests</a>
+        <a href="#activity">Activity</a>
+        <a href="#quality">Code quality</a>
+        <a href="#suggestions">Suggestions</a>
+      </nav>
+    </aside>
+
+    <main class="app-shell">
+      <section class="toolbar" aria-label="Repository controls">
+        <div class="repository-heading">
+          <p class="eyebrow">Selected repository</p>
+          <h2>open-source/shopfront</h2>
+          <p class="repository-summary">
+            A clear view of review pace, code health, and the work that needs
+            attention next.
+          </p>
+        </div>
+        <div class="toolbar-actions">
+          <button type="button">Connect GitHub</button>
+          <button type="button" class="secondary">Refresh</button>
+        </div>
+      </section>
+
+      <div class="report-meta" aria-label="Report details">
+        <span>Repository report</span>
+        <span>Updated today</span>
+        <span>30-day window</span>
+      </div>
+
+      <section id="overview" class="metric-grid" aria-label="Repository overview"></section>
+
+      <section class="content-grid">
+        <article id="pull-requests" class="panel wide">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Review flow</p>
+              <h3>Pull request analytics</h3>
+            </div>
+            <span class="status-pill warning">3 need attention</span>
+          </div>
+          <div id="pull-request-list" class="item-list"></div>
+        </article>
+
+        <article id="activity" class="panel">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Last 30 days</p>
+              <h3>Commit activity</h3>
+            </div>
+          </div>
+          <div id="activity-chart" class="bar-chart" aria-label="Commit chart"></div>
+        </article>
+
+        <article id="quality" class="panel">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Signals</p>
+              <h3>Code quality</h3>
+            </div>
+          </div>
+          <div id="quality-list" class="signal-list"></div>
+        </article>
+
+        <article id="suggestions" class="panel wide">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Next actions</p>
+              <h3>Improvement suggestions</h3>
+            </div>
+          </div>
+          <div id="suggestion-list" class="suggestion-list"></div>
+        </article>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
