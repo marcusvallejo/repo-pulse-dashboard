@@ -297,3 +297,27 @@ const repositorySelect = document.querySelector("#repository-select");
 repositorySelect.addEventListener("change", changeRepository);
 
 refreshButton.addEventListener("click", refreshDashboard);
+
+async function loadRepositoryData() {
+  try {
+    const response = await fetch("data/repositories.json");
+
+    if (!response.ok) {
+      throw new Error("Could not load repository data");
+    }
+
+    const data = await response.json();
+
+    Object.keys(data).forEach(function (repositoryName) {
+      repositoryData[repositoryName].metrics =
+        data[repositoryName].metrics;
+    });
+
+    changeRepository();
+  } catch (error) {
+    console.error(error);
+    lastUpdated.textContent = "Data unavailable";
+  }
+}
+
+loadRepositoryData();

@@ -1,3 +1,5 @@
+const fs = require("fs");
+
 const elements = {};
 
 function elementFor(selector) {
@@ -13,6 +15,21 @@ function elementFor(selector) {
 
 global.document = {
   querySelector: elementFor,
+};
+
+elementFor("#repository-select").value = "shopfront";
+
+global.fetch = async function () {
+  const repositoryData = JSON.parse(
+    fs.readFileSync("data/repositories.json", "utf8"),
+  );
+
+  return {
+    ok: true,
+    json: async function () {
+      return repositoryData;
+    },
+  };
 };
 
 require("../app.js");
@@ -48,4 +65,3 @@ if (failures.length > 0) {
 }
 
 console.log("Smoke test passed:", results);
-
