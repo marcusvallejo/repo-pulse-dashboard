@@ -29,7 +29,11 @@
       <section class="toolbar" aria-label="Repository controls">
         <div class="repository-heading">
           <p class="eyebrow">Selected repository</p>
-          <h2>open-source/shopfront</h2>
+          <select id="repository-select" aria-label="Selected repository">
+            <option value="shopfront">open-source/shopfront</option>
+            <option value="api-service">open-source/api-service</option>
+            <option value="mobile-app">open-source/mobile-app</option>
+          </select>
           <p class="repository-summary">
             A clear view of review pace, code health, and the work that needs
             attention next.
@@ -43,7 +47,7 @@
 
       <div class="report-meta" aria-label="Report details">
         <span>Repository report</span>
-        <span>Updated today</span>
+        <span id="last-updated">Updated today</span>
         <span>30-day window</span>
       </div>
 

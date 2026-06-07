@@ -366,16 +366,36 @@ button.secondary:hover {
 
 .bar {
   display: grid;
-  align-content: end;
+  grid-template-rows: 160px 20px;
   gap: 8px;
   min-width: 0;
-  height: 190px;
+}
+
+.bar-track {
+  display: flex;
+  height: 160px;
+  align-items: flex-end;
+  border-bottom: 1px solid var(--line);
 }
 
 .bar-value {
+  position: relative;
+  width: 100%;
   min-height: 18px;
+  flex: none;
   border-radius: 5px 5px 0 0;
   background: var(--olive-light);
+}
+
+.bar-count {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 5px);
+  left: 0;
+  color: var(--ink);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-align: center;
 }
 
 .bar-label {

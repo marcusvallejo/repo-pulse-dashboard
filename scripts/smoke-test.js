@@ -2,7 +2,10 @@ const elements = {};
 
 function elementFor(selector) {
   if (!elements[selector]) {
-    elements[selector] = { innerHTML: "" };
+    elements[selector] = {
+      innerHTML: "",
+      addEventListener: function () {},
+    };
   }
 
   return elements[selector];

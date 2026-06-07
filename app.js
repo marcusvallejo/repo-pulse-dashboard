@@ -1,11 +1,25 @@
-const metrics = [
-  { label: "Open PRs", value: "18", note: "5 waiting on review" },
-  { label: "Avg merge time", value: "2.8d", note: "Down 14% this month" },
-  { label: "Commits", value: "146", note: "Last 30 days" },
-  { label: "Health score", value: "82", note: "Strong, with review risk" },
-];
+const repositoryMetrics = {
+  shopfront: [
+    { label: "Open PRs", value: "18", note: "5 waiting on review" },
+    { label: "Avg merge time", value: "2.8d", note: "Down 14% this month" },
+    { label: "Commits", value: "146", note: "Last 30 days" },
+    { label: "Health score", value: "82", note: "Strong, with review risk" },
+  ],
+  "api-service": [
+    { label: "Open PRs", value: "9", note: "2 waiting on review" },
+    { label: "Avg merge time", value: "1.6d", note: "Down 8% this month" },
+    { label: "Commits", value: "203", note: "Last 30 days" },
+    { label: "Health score", value: "91", note: "Healthy and moving quickly" },
+  ],
+  "mobile-app": [
+    { label: "Open PRs", value: "24", note: "8 waiting on review" },
+    { label: "Avg merge time", value: "4.2d", note: "Up 19% this month" },
+    { label: "Commits", value: "98", note: "Last 30 days" },
+    { label: "Health score", value: "68", note: "Review backlog needs attention" },
+  ],
+};
 
-const pullRequests = [
+const shopfrontPullRequests = [
   {
     title: "Refactor checkout payment flow",
     meta: "Open 9 days, 684 lines changed",
@@ -26,7 +40,55 @@ const pullRequests = [
   },
 ];
 
-const activity = [
+const repositoryPullRequests = {
+  shopfront: shopfrontPullRequests,
+  "api-service": [
+    {
+      title: "Add request tracing headers",
+      meta: "Open 6 days, 318 lines changed",
+      risk: "medium",
+      summary:
+        "Changes shared middleware and should be checked across every API route.",
+    },
+    {
+      title: "Rate-limit authentication endpoints",
+      meta: "Open 4 days, 176 lines changed",
+      risk: "high",
+      summary:
+        "Security-sensitive behavior needs review under both normal and burst traffic.",
+    },
+    {
+      title: "Document pagination parameters",
+      meta: "Open 1 day, 42 lines changed",
+      risk: "low",
+      summary: "Documentation-only change with a small review surface.",
+    },
+  ],
+  "mobile-app": [
+    {
+      title: "Rework offline synchronization",
+      meta: "Open 12 days, 921 lines changed",
+      risk: "high",
+      summary:
+        "Large state-management change has remained open and needs focused review.",
+    },
+    {
+      title: "Add biometric sign-in",
+      meta: "Open 5 days, 287 lines changed",
+      risk: "medium",
+      summary:
+        "Touches authentication and device APIs, so failure paths need testing.",
+    },
+    {
+      title: "Fix profile image cropping",
+      meta: "Open 2 days, 51 lines changed",
+      risk: "low",
+      summary: "Small presentation fix with limited application impact.",
+    },
+  ],
+};
+
+const shopfrontActivity = [
   { day: "Mon", commits: 19 },
   { day: "Tue", commits: 28 },
   { day: "Wed", commits: 22 },
@@ -35,6 +97,50 @@ const activity = [
   { day: "Sat", commits: 8 },
   { day: "Sun", commits: 13 },
 ];
+
+const repositoryActivity = {
+  shopfront: shopfrontActivity,
+  "api-service": [
+    { day: "Mon", commits: 31 },
+    { day: "Tue", commits: 26 },
+    { day: "Wed", commits: 38 },
+    { day: "Thu", commits: 42 },
+    { day: "Fri", commits: 35 },
+    { day: "Sat", commits: 17 },
+    { day: "Sun", commits: 14 },
+  ],
+  "mobile-app": [
+    { day: "Mon", commits: 12 },
+    { day: "Tue", commits: 18 },
+    { day: "Wed", commits: 14 },
+    { day: "Thu", commits: 21 },
+    { day: "Fri", commits: 16 },
+    { day: "Sat", commits: 9 },
+    { day: "Sun", commits: 8 },
+  ],
+};
+
+const repositoryData = {
+  shopfront: {
+    metrics: repositoryMetrics.shopfront,
+    pullRequests: repositoryPullRequests.shopfront,
+    activity: repositoryActivity.shopfront,
+  },
+  "api-service": {
+    metrics: repositoryMetrics["api-service"],
+    pullRequests: repositoryPullRequests["api-service"],
+    activity: repositoryActivity["api-service"],
+  },
+  "mobile-app": {
+    metrics: repositoryMetrics["mobile-app"],
+    pullRequests: repositoryPullRequests["mobile-app"],
+    activity: repositoryActivity["mobile-app"],
+  },
+};
+
+let metrics = repositoryData.shopfront.metrics;
+let pullRequests = repositoryData.shopfront.pullRequests;
+let activity = repositoryData.shopfront.activity;
 
 const qualitySignals = [
   { label: "Large files", value: "7" },
@@ -93,7 +199,8 @@ function renderPullRequests() {
 
 function renderActivity() {
   const container = document.querySelector("#activity-chart");
-  const maxCommits = Math.max(...activity.map((item) => item.commits));
+  const allActivity = Object.values(repositoryActivity).flat();
+  const maxCommits = Math.max(...allActivity.map((item) => item.commits));
 
   container.innerHTML = activity
     .map((item) => {
@@ -101,7 +208,11 @@ function renderActivity() {
 
       return `
         <div class="bar">
-          <div class="bar-value" style="height: ${height}%"></div>
+          <div class="bar-track">
+            <div class="bar-value" style="height: ${height}%">
+              <span class="bar-count">${item.commits}</span>
+            </div>
+          </div>
           <div class="bar-label">${item.day}</div>
         </div>
       `;
@@ -137,9 +248,52 @@ function renderSuggestions() {
     .join("");
 }
 
+function refreshDashboard() {
+  refreshButton.textContent = "Refreshing...";
+  refreshButton.disabled = true;
+  setTimeout(function () {
+    const currentValue = Number(metrics[0].value);
+    const newValue = currentValue + 1;
+    metrics[0].value = String(newValue);
+    renderMetrics();
+    const now = new Date();
+
+    const time = now.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+    refreshButton.textContent = "Refresh";
+    refreshButton.disabled = false;
+    lastUpdated.textContent = `Updated at ${time}`;
+  }, 1000);
+}
+
+function changeRepository() {
+  const selectedRepository = repositorySelect.value;
+  const selectedData = repositoryData[selectedRepository];
+
+  metrics = selectedData.metrics;
+  pullRequests = selectedData.pullRequests;
+  activity = selectedData.activity;
+
+  renderMetrics();
+  renderPullRequests();
+  renderActivity();
+
+  lastUpdated.textContent = "Updated today";
+}
+
 renderMetrics();
 renderPullRequests();
 renderActivity();
 renderQualitySignals();
 renderSuggestions();
 
+const refreshButton = document.querySelector(".secondary");
+const lastUpdated = document.querySelector("#last-updated");
+const repositorySelect = document.querySelector("#repository-select");
+
+
+repositorySelect.addEventListener("change", changeRepository);
+
+refreshButton.addEventListener("click", refreshDashboard);
