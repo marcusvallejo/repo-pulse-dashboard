@@ -310,7 +310,12 @@ async function loadRepositoryData() {
 
     Object.keys(data).forEach(function (repositoryName) {
       repositoryData[repositoryName].metrics =
-        data[repositoryName].metrics;
+        data[repositoryName].metrics;     
+      repositoryData[repositoryName].pullRequests =
+        data[repositoryName].pullRequests;
+      repositoryData[repositoryName].activity =
+        data[repositoryName].activity
+      
     });
 
     changeRepository();

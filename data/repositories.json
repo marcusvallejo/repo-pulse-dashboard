@@ -21,6 +21,23 @@
         "value": "82",
         "note": "Strong, with review risk"
       }
+    ],
+    "pullRequests": [
+      {
+        "title": "Refactor checkout payment flow",
+        "meta": "Open 9 days, 684 lines changed",
+        "risk": "high",
+        "summary": "Large customer-facing change has waited several days for review."
+      }
+    ],
+    "activity": [
+      { "day": "Mon", "commits": 19 },
+      { "day": "Tue", "commits": 28 },
+      { "day": "Wed", "commits": 22 },
+      { "day": "Thu", "commits": 31 },
+      { "day": "Fri", "commits": 25 },
+      { "day": "Sat", "commits": 8 },
+      { "day": "Sun", "commits": 13 }
     ]
   },
   "api-service": {
@@ -45,6 +62,23 @@
         "value": "91",
         "note": "Healthy and moving quickly"
       }
+    ],
+    "pullRequests": [
+      {
+      "title": "Add request tracing headers",
+      "meta": "Open 6 days, 318 lines changed",
+      "risk": "medium",
+      "summary": "Changes shared middleware across API routes."
+      }
+    ],
+    "activity": [
+      { "day": "Mon", "commits": 31 },
+      { "day": "Tue", "commits": 26 },
+      { "day": "Wed", "commits": 38 },
+      { "day": "Thu", "commits": 42 },
+      { "day": "Fri", "commits": 35 },
+      { "day": "Sat", "commits": 17 },
+      { "day": "Sun", "commits": 14 }
     ]
   },
   "mobile-app": {
@@ -69,6 +103,23 @@
         "value": "68",
         "note": "Review backlog needs attention"
       }
+    ],
+    "pullRequests": [
+      {
+        "title": "Rework offline synchronization",
+        "meta": "Open 12 days, 921 lines changed",
+        "risk": "high",
+        "summary": "Large state-management change has remained open and needs focused review."
+      }
+    ],
+    "activity": [
+      { "day": "Mon", "commits": 12 },
+      { "day": "Tue", "commits": 18 },
+      { "day": "Wed", "commits": 14 },
+      { "day": "Thu", "commits": 21 },
+      { "day": "Fri", "commits": 16 },
+      { "day": "Sat", "commits": 9 },
+      { "day": "Sun", "commits": 8 }
     ]
   }
 }
