@@ -155,6 +155,59 @@ strong {
   line-height: 1;
 }
 
+.repository-select-wrap {
+  position: relative;
+  width: min(100%, 380px);
+}
+
+.repository-select-wrap::after {
+  position: absolute;
+  top: 50%;
+  right: 19px;
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid var(--rust-dark);
+  border-bottom: 2px solid var(--rust-dark);
+  content: "";
+  pointer-events: none;
+  transform: translateY(-70%) rotate(45deg);
+}
+
+#repository-select {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 52px 0 16px;
+  appearance: none;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  outline: none;
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+#repository-select:hover {
+  border-color: var(--rust);
+  background: var(--paper-deep);
+}
+
+#repository-select:focus-visible {
+  border-color: var(--rust-dark);
+  box-shadow:
+    0 0 0 3px rgba(189, 103, 72, 0.2),
+    var(--shadow);
+}
+
+#repository-select option {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: "Segoe UI", ui-sans-serif, system-ui, sans-serif;
+}
+
 .repository-summary {
   max-width: 630px;
   margin: 18px 0 0;
