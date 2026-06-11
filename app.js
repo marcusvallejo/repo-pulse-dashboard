@@ -248,24 +248,24 @@ function renderSuggestions() {
     .join("");
 }
 
-function refreshDashboard() {
+async function refreshDashboard() {
   refreshButton.textContent = "Refreshing...";
-  refreshButton.disabled = true;
-  setTimeout(function () {
-    const currentValue = Number(metrics[0].value);
-    const newValue = currentValue + 1;
-    metrics[0].value = String(newValue);
-    renderMetrics();
-    const now = new Date();
 
-    const time = now.toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-    refreshButton.textContent = "Refresh";
-    refreshButton.disabled = false;
-    lastUpdated.textContent = `Updated at ${time}`;
-  }, 1000);
+  const succeeded = await loadRepositoryData();
+
+  refreshButton.textContent = "Refresh";
+
+  if (!succeeded) {
+    return;
+  }
+
+  const now = new Date();
+  const time = now.toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+  lastUpdated.textContent = `Updated at ${time}`;
 }
 
 function changeRepository() {
@@ -300,6 +300,9 @@ refreshButton.addEventListener("click", refreshDashboard);
 
 async function loadRepositoryData() {
   try {
+    lastUpdated.textContent = "Loading data...";
+    repositorySelect.disabled = true;
+    refreshButton.disabled = true;
     const response = await fetch("data/repositories.json");
 
     if (!response.ok) {
@@ -314,14 +317,18 @@ async function loadRepositoryData() {
       repositoryData[repositoryName].pullRequests =
         data[repositoryName].pullRequests;
       repositoryData[repositoryName].activity =
-        data[repositoryName].activity
-      
+        data[repositoryName].activity;
     });
 
     changeRepository();
+    return true;
   } catch (error) {
     console.error(error);
     lastUpdated.textContent = "Data unavailable";
+    return false;
+  } finally {
+    repositorySelect.disabled = false;
+    refreshButton.disabled = false;
   }
 }
 
