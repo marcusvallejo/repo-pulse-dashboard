@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import MetricGrid from "./components/MetricGrid";
+import PullRequestList from "./components/PullRequestList";
+import ActivityChart from "./components/ActivityChart";
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -30,6 +32,8 @@ function App() {
   }, []);
 
   const metrics = repositoryData?.[selectedRepository]?.metrics ?? [];
+  const pullRequests = repositoryData?.[selectedRepository]?.pullRequests ?? [];
+  const activity = repositoryData?.[selectedRepository]?.activity ?? [];
 
   return (
     <main>
@@ -48,7 +52,11 @@ function App() {
         <option value="mobile-app">open-source/mobile-app</option>
       </select>
 
-      {metrics.length > 0 && <MetricGrid metrics = {metrics} />}
+      {metrics.length > 0 && <MetricGrid metrics={metrics} />}
+      {pullRequests.length > 0 && (
+        <PullRequestList pullRequests={pullRequests} />
+      )}
+      {activity.length > 0 && <ActivityChart activity={activity} />}
     </main>
   );
 }
