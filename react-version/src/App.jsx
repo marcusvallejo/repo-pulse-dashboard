@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import MetricGrid from "./components/MetricGrid";
 import PullRequestList from "./components/PullRequestList";
 import ActivityChart from "./components/ActivityChart";
+import RepositorySelector from "./components/RepositorySelector";
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -43,14 +44,10 @@ function App() {
       {isLoading && <p>Loading repository data...</p>}
       {errorMessage && <p>{errorMessage}</p>}
 
-      <select
-        value={selectedRepository}
-        onChange={(event) => setSelectedRepository(event.target.value)}
-      >
-        <option value="shopfront">open-source/shopfront</option>
-        <option value="api-service">open-source/api-service</option>
-        <option value="mobile-app">open-source/mobile-app</option>
-      </select>
+      <RepositorySelector
+        selectedRepository={selectedRepository}
+        onRepositoryChange={setSelectedRepository}
+      />
 
       {metrics.length > 0 && <MetricGrid metrics={metrics} />}
       {pullRequests.length > 0 && (
