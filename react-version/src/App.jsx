@@ -1,36 +1,14 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import MetricGrid from "./components/MetricGrid";
 import PullRequestList from "./components/PullRequestList";
 import ActivityChart from "./components/ActivityChart";
 import RepositorySelector from "./components/RepositorySelector";
+import useRepositoryData from "./hooks/useRepositoryData";
 
 function App() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [errorMessage, setErrorMessage] = useState("");
+  const { repositoryData, isLoading, errorMessage } =
+    useRepositoryData();
   const [selectedRepository, setSelectedRepository] = useState("shopfront");
-  const [repositoryData, setRepositoryData] = useState(null);
-
-  useEffect(function () {
-    async function loadRepositoryData() {
-      try {
-        const response = await fetch("/data/repositories.json");
-
-        if (!response.ok) {
-          throw new Error("Could not load repository data");
-        }
-
-        const data = await response.json();
-        setRepositoryData(data);
-      } catch (error) {
-        console.error(error);
-        setErrorMessage("Using fallback data");
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    loadRepositoryData();
-  }, []);
 
   const metrics = repositoryData?.[selectedRepository]?.metrics ?? [];
   const pullRequests = repositoryData?.[selectedRepository]?.pullRequests ?? [];
