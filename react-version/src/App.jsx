@@ -22,7 +22,12 @@ function App() {
       {isLoading && <p>Loading repository data...</p>}
       {errorMessage && <p>{errorMessage}</p>}
 
-      <button type="button" onClick={reloadRepositoryData}>Refresh data</button>
+      <button type="button" 
+        onClick={reloadRepositoryData}
+        disabled={isLoading}
+      >
+        {isLoading ? "Refreshing..." : "Refresh data"}
+      </button>
       <RepositorySelector
         selectedRepository={selectedRepository}
         onRepositoryChange={setSelectedRepository}
