@@ -1,10 +1,8 @@
 import { useState } from "react";
-import MetricGrid from "./components/MetricGrid";
-import PullRequestList from "./components/PullRequestList";
-import ActivityChart from "./components/ActivityChart";
 import RepositorySelector from "./components/RepositorySelector";
 import useRepositoryData from "./hooks/useRepositoryData";
 import RefreshButton from "./components/RefreshButton";
+import DashboardSections from "./components/DashboardSections";
 
 function App() {
   const { repositoryData, isLoading, errorMessage, reloadRepositoryData } =
@@ -33,11 +31,11 @@ function App() {
         onRepositoryChange={setSelectedRepository}
       />
 
-      {metrics.length > 0 && <MetricGrid metrics={metrics} />}
-      {pullRequests.length > 0 && (
-        <PullRequestList pullRequests={pullRequests} />
-      )}
-      {activity.length > 0 && <ActivityChart activity={activity} />}
+      <DashboardSections
+        metrics={metrics}
+        pullRequests={pullRequests}
+        activity={activity}
+      />
     </main>
   );
 }
