@@ -6,7 +6,7 @@ import RepositorySelector from "./components/RepositorySelector";
 import useRepositoryData from "./hooks/useRepositoryData";
 
 function App() {
-  const { repositoryData, isLoading, errorMessage } =
+  const { repositoryData, isLoading, errorMessage, reloadRepositoryData } =
     useRepositoryData();
   const [selectedRepository, setSelectedRepository] = useState("shopfront");
 
@@ -22,6 +22,7 @@ function App() {
       {isLoading && <p>Loading repository data...</p>}
       {errorMessage && <p>{errorMessage}</p>}
 
+      <button type="button" onClick={reloadRepositoryData}>Refresh data</button>
       <RepositorySelector
         selectedRepository={selectedRepository}
         onRepositoryChange={setSelectedRepository}
