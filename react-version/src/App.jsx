@@ -5,13 +5,13 @@ import RefreshButton from "./components/RefreshButton";
 import DashboardSections from "./components/DashboardSections";
 
 function App() {
-  const { repositoryData, isLoading, errorMessage, reloadRepositoryData } =
-    useRepositoryData();
   const [selectedRepository, setSelectedRepository] = useState("shopfront");
+  const { repositoryData, isLoading, errorMessage, reloadRepositoryData } =
+    useRepositoryData(selectedRepository);
 
-  const metrics = repositoryData?.[selectedRepository]?.metrics ?? [];
-  const pullRequests = repositoryData?.[selectedRepository]?.pullRequests ?? [];
-  const activity = repositoryData?.[selectedRepository]?.activity ?? [];
+  const metrics = repositoryData?.metrics ?? [];
+  const pullRequests = repositoryData?.pullRequests ?? [];
+  const activity = repositoryData?.activity ?? [];
 
   return (
     <main>

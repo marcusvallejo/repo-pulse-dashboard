@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 const REPOSITORY_DATA_URL = "/api/repositories";
 
-async function fetchRepositoryData() {
-  const response = await fetch(REPOSITORY_DATA_URL);
+async function fetchRepositoryData(repositoryId) {
+  const response = await fetch(`${REPOSITORY_DATA_URL}/${repositoryId}`);
 
   if (!response.ok) {
     throw new Error("Could not load repository data");
@@ -12,17 +12,17 @@ async function fetchRepositoryData() {
   return response.json();
 }
 
-function useRepositoryData() {
+function useRepositoryData(selectedRepository) {
   const [isLoading, setIsLoading] = useState(true);
   const [repositoryData, setRepositoryData] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
 
-  async function loadRepositoryData() {
+  const loadRepositoryData = useCallback(async function () {
     try {
       setIsLoading(true);
       setErrorMessage("");
 
-      const data = await fetchRepositoryData();
+      const data = await fetchRepositoryData(selectedRepository);
       setRepositoryData(data);
     } catch (error) {
       console.error(error);
@@ -30,23 +30,11 @@ function useRepositoryData() {
     } finally {
       setIsLoading(false);
     }
-  }
+  }, [selectedRepository]);
 
   useEffect(function () {
-    async function loadInitialRepositoryData() {
-      try {
-        const data = await fetchRepositoryData();
-        setRepositoryData(data);
-      } catch (error) {
-        console.error(error);
-        setErrorMessage("Using fallback data");
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    loadInitialRepositoryData();
-  }, []);
+    loadRepositoryData();
+  }, [loadRepositoryData]);
 
   return {
     repositoryData,

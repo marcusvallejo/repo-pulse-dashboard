@@ -15,6 +15,19 @@ app.get("/api/repositories", function (request, response) {
   response.json(repositories);
 });
 
+app.get("/api/repositories/:repositoryId", function (request, response) {
+  const repositoryId = request.params.repositoryId;
+  const repository = repositories[repositoryId];
+
+  if (!repository) {
+    return response.status(404).json({
+      error: "Repository not found",
+    });
+  }
+
+  response.json(repository);
+});
+
 app.listen(PORT, function () {
   console.log(`RepoPulse API running at http://localhost:${PORT}`);
 });
