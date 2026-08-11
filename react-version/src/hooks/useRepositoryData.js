@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-const REPOSITORY_DATA_URL = "/data/repositories.json";
+const REPOSITORY_DATA_URL = "/api/repositories";
 
 async function fetchRepositoryData() {
   const response = await fetch(REPOSITORY_DATA_URL);
