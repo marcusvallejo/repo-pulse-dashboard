@@ -21,6 +21,7 @@ function useRepositoryData(selectedRepository) {
     try {
       setIsLoading(true);
       setErrorMessage("");
+      setRepositoryData(null);
 
       const data = await fetchRepositoryData(selectedRepository);
       setRepositoryData(data);
