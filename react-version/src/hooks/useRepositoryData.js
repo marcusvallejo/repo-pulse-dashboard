@@ -6,7 +6,8 @@ async function fetchRepositoryData(repositoryId) {
   const response = await fetch(`${REPOSITORY_DATA_URL}/${repositoryId}`);
 
   if (!response.ok) {
-    throw new Error("Could not load repository data");
+    const errorData = await response.json();
+    throw new Error(errorData.error);
   }
 
   return response.json();
@@ -27,7 +28,7 @@ function useRepositoryData(selectedRepository) {
       setRepositoryData(data);
     } catch (error) {
       console.error(error);
-      setErrorMessage("Using fallback data");
+      setErrorMessage(error.message);
     } finally {
       setIsLoading(false);
     }
