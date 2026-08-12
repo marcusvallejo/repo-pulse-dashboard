@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import RepositorySelector from "./components/RepositorySelector";
 import useRepositoryData from "./hooks/useRepositoryData";
 import RefreshButton from "./components/RefreshButton";
@@ -6,8 +6,24 @@ import DashboardSections from "./components/DashboardSections";
 
 function App() {
   const [selectedRepository, setSelectedRepository] = useState("shopfront");
+  const [repositories, setRepositories] = useState([]);
   const { repositoryData, isLoading, errorMessage, reloadRepositoryData } =
     useRepositoryData(selectedRepository);
+
+  useEffect(function () {
+    async function loadRepositories() {
+      try {
+        const response = await fetch("/api/repositories");
+        const data = await response.json();
+
+        setRepositories(Object.keys(data));
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    loadRepositories();
+  }, []);
 
   const metrics = repositoryData?.metrics ?? [];
   const pullRequests = repositoryData?.pullRequests ?? [];
@@ -27,6 +43,7 @@ function App() {
       />
 
       <RepositorySelector
+        repositories={repositories}
         selectedRepository={selectedRepository}
         onRepositoryChange={setSelectedRepository}
       />
