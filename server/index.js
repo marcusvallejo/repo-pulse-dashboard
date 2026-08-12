@@ -22,6 +22,7 @@ app.get("/api/repositories/:repositoryId", function (request, response) {
   if (!repository) {
     return response.status(404).json({
       error: "Repository not found",
+      availableRepositories: Object.keys(repositories),
     });
   }
 
