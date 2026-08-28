@@ -3,6 +3,13 @@ const repositories = require("../data/repositories.json");
 
 const router = express.Router();
 
+function sendRepositoryNotFound(response) {
+  return response.status(404).json({
+    error: "Repository not found",
+    availableRepositories: Object.keys(repositories),
+  });
+}
+
 router.get("/", function (request, response) {
   response.json(repositories);
 });
@@ -12,10 +19,7 @@ router.get("/:repositoryId/summary", function (request, response) {
   const repository = repositories[repositoryId];
 
   if (!repository) {
-    return response.status(404).json({
-      error: "Repository not found",
-      availableRepositories: Object.keys(repositories),
-    });
+    return sendRepositoryNotFound(response);
   }
 
   response.json({
@@ -31,10 +35,7 @@ router.get("/:repositoryId", function (request, response) {
   const repository = repositories[repositoryId];
 
   if (!repository) {
-    return response.status(404).json({
-      error: "Repository not found",
-      availableRepositories: Object.keys(repositories),
-    });
+    return sendRepositoryNotFound(response);
   }
 
   response.json(repository);
