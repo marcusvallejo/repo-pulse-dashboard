@@ -10,6 +10,14 @@ function sendRepositoryNotFound(response) {
   });
 }
 
+function findMetricValue(repository, label) {
+  const metric = repository.metrics.find(function (metric) {
+    return metric.label === label;
+  });
+
+  return metric?.value;
+}
+
 router.get("/", function (request, response) {
   response.json(repositories);
 });
@@ -24,9 +32,9 @@ router.get("/:repositoryId/summary", function (request, response) {
 
   response.json({
     id: repositoryId,
-    openPullRequests: repository.metrics[0].value,
-    commits: repository.metrics[2].value,
-    healthScore: repository.metrics[3].value,
+    openPullRequests: findMetricValue(repository, "Open PRs"),
+    commits: findMetricValue(repository, "Commits"),
+    healthScore: findMetricValue(repository, "Health score"),
   });
 });
 
