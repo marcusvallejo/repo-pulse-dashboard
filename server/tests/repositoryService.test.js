@@ -26,4 +26,8 @@ describe("repositoryService", function () {
       healthScore: "82",
     });
   });
+
+  it("returns null for a missing repository summary", function () {
+    expect(repositoryService.getRepositorySummary("not-real")).toBeNull();
+  });
 });

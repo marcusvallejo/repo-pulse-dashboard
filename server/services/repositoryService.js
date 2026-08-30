@@ -23,6 +23,10 @@ function findMetricValue(repository, label) {
 function getRepositorySummary(repositoryId) {
   const repository = getRepositoryById(repositoryId);
 
+  if (!repository) {
+    return null;
+  }
+
   return {
     id: repositoryId,
     openPullRequests: findMetricValue(repository, "Open PRs"),
