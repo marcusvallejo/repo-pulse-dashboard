@@ -5,6 +5,7 @@ const checks = [
   {
     name: "health route",
     path: "/api/health",
+    expectedStatus: 200,
     validate: function (data) {
       return data.status === "ok";
     },
@@ -12,6 +13,7 @@ const checks = [
   {
     name: "repository detail route",
     path: "/api/repositories/shopfront",
+    expectedStatus: 200,
     validate: function (data) {
       return (
         Array.isArray(data.metrics) &&
@@ -23,12 +25,24 @@ const checks = [
   {
     name: "repository summary route",
     path: "/api/repositories/shopfront/summary",
+    expectedStatus: 200,
     validate: function (data) {
       return (
         data.id === "shopfront" &&
         data.openPullRequests !== undefined &&
         data.commits !== undefined &&
         data.healthScore !== undefined
+      );
+    },
+  },
+  {
+    name: "missing repository route",
+    path: "/api/repositories/not-real",
+    expectedStatus: 404,
+    validate: function (data) {
+      return (
+        data.error === "Repository not found" &&
+        Array.isArray(data.availableRepositories)
       );
     },
   },
@@ -39,8 +53,10 @@ async function checkEndpoint(check) {
     signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
   });
 
-  if (!response.ok) {
-    throw new Error(`${check.name} failed with status ${response.status}`);
+  if (response.status !== check.expectedStatus) {
+    throw new Error(
+      `${check.name} expected status ${check.expectedStatus} but received ${response.status}`
+    );
   }
 
   const data = await response.json();
