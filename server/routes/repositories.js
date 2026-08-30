@@ -16,13 +16,13 @@ router.get("/", function (request, response) {
 
 router.get("/:repositoryId/summary", function (request, response) {
   const repositoryId = request.params.repositoryId;
-  const repository = repositoryService.getRepositoryById(repositoryId);
+  const summary = repositoryService.getRepositorySummary(repositoryId);
 
-  if (!repository) {
+  if (!summary) {
     return sendRepositoryNotFound(response);
   }
 
-  response.json(repositoryService.getRepositorySummary(repositoryId));
+  response.json(summary);
 });
 
 router.get("/:repositoryId", function (request, response) {
