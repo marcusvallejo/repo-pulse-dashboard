@@ -5,31 +5,48 @@ const checks = [
   {
     name: "health route",
     path: "/api/health",
+    validate: function (data) {
+      return data.status === "ok";
+    },
   },
   {
     name: "repository detail route",
     path: "/api/repositories/shopfront",
+    validate: function (data) {
+      return (
+        Array.isArray(data.metrics) &&
+        Array.isArray(data.pullRequests) &&
+        Array.isArray(data.activity)
+      );
+    },
   },
   {
     name: "repository summary route",
     path: "/api/repositories/shopfront/summary",
+    validate: function (data) {
+      return (
+        data.id === "shopfront" &&
+        data.openPullRequests !== undefined &&
+        data.commits !== undefined &&
+        data.healthScore !== undefined
+      );
+    },
   },
 ];
 
 async function checkEndpoint(check) {
-  const controller = new AbortController();
-  const timeout = setTimeout(function () {
-    controller.abort();
-  }, REQUEST_TIMEOUT_MS);
-
   const response = await fetch(`${BASE_URL}${check.path}`, {
-    signal: controller.signal,
+    signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
   });
-
-  clearTimeout(timeout);
 
   if (!response.ok) {
     throw new Error(`${check.name} failed with status ${response.status}`);
+  }
+
+  const data = await response.json();
+
+  if (!check.validate(data)) {
+    throw new Error(`${check.name} returned unexpected data`);
   }
 
   console.log(`PASS ${check.name}`);
