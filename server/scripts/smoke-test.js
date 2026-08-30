@@ -3,6 +3,18 @@ const REQUEST_TIMEOUT_MS = 5000;
 
 const checks = [
   {
+    name: "root route",
+    path: "/",
+    expectedStatus: 200,
+    validate: function (data) {
+      return (
+        data.service === "RepoPulse API" &&
+        data.status === "running" &&
+        Array.isArray(data.endpoints)
+      );
+    },
+  },
+  {
     name: "health route",
     path: "/api/health",
     expectedStatus: 200,
