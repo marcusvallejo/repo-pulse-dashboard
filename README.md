@@ -13,22 +13,48 @@ RepoPulse is a GitHub code review and repository analytics dashboard. It brings 
 
 ## Current Status
 
-RepoPulse is currently a frontend prototype powered by representative sample data. GitHub authentication and live repository analytics are planned for a future release.
+RepoPulse currently has a React frontend and an Express backend powered by representative sample repository data. GitHub authentication and live repository analytics are planned for a future release.
 
 ## Run Locally
 
-Clone the repository and open `index.html` in a browser:
+Clone the repository:
 
 ```bash
 git clone https://github.com/marcusvallejo/repo-pulse-dashboard.git
 cd repo-pulse-dashboard
 ```
 
-No dependencies or build step are required.
+The original static prototype can still be opened with `index.html`.
+
+## Backend API
+
+The Express backend lives in `server`.
+
+### Run the backend
+
+```powershell
+cd server
+npm run dev
+```
+
+### Test the backend
+
+```powershell
+npm test
+npm run smoke-test
+```
+
+### API routes
+
+- `GET /`
+- `GET /api/health`
+- `GET /api/repositories`
+- `GET /api/repositories/:repositoryId`
+- `GET /api/repositories/:repositoryId/summary`
 
 ## Verification
 
-Run the lightweight rendering check with Node.js:
+Run the static prototype smoke test from the project root:
 
 ```bash
 node scripts/smoke-test.js
