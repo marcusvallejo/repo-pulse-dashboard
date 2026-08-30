@@ -1,5 +1,6 @@
 const express = require("express");
 const repositoriesRouter = require("./routes/repositories");
+const githubRouter = require("./routes/github");
 
 const app = express();
 
@@ -24,5 +25,7 @@ app.get("/api/health", function (request, response) {
 });
 
 app.use("/api/repositories", repositoriesRouter);
+
+app.use("/api/github", githubRouter);
 
 module.exports = app;
