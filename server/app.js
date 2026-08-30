@@ -13,6 +13,7 @@ app.get("/", function (request, response) {
       "/api/repositories",
       "/api/repositories/:repositoryId",
       "/api/repositories/:repositoryId/summary",
+      "/api/github/status",
     ],
   });
 });
