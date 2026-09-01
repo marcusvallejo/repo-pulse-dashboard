@@ -3,6 +3,7 @@ import RepositorySelector from "./components/RepositorySelector";
 import useRepositoryData from "./hooks/useRepositoryData";
 import RefreshButton from "./components/RefreshButton";
 import DashboardSections from "./components/DashboardSections";
+import GithubStatus from "./components/GithubStatus";
 
 function App() {
   const [selectedRepository, setSelectedRepository] = useState("shopfront");
@@ -33,6 +34,7 @@ function App() {
     <main>
       <h1>RepoPulse React Version</h1>
       <p>This is where we will migrate the dashboard piece by piece.</p>
+      <GithubStatus />
 
       {isLoading && <p>Loading repository data...</p>}
       {errorMessage && <p>{errorMessage}</p>}
