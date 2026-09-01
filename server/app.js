@@ -15,6 +15,7 @@ app.get("/", function (request, response) {
       "/api/repositories/:repositoryId/summary",
       "/api/github/status",
       "/api/github/user",
+      "/api/github/repositories",
     ],
   });
 });
