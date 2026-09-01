@@ -4,5 +4,6 @@ node_modules/
 server/.env
 dist/
 coverage/
+dev-server*.log
 .DS_Store
 Thumbs.db

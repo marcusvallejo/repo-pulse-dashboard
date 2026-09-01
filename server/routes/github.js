@@ -9,16 +9,23 @@ router.get("/status", function (request, response) {
   });
 });
 
-router.get("/user", function (request, response) {
+router.get("/user", async function (request, response) {
   if (!githubService.hasGithubToken()) {
     return response.status(401).json({
       error: "GitHub token is not configured",
     });
   }
 
-  response.json({
-    message: "GitHub user lookup is not implemented yet",
-  });
+  try {
+    const user = await githubService.getAuthenticatedUser();
+    response.json(user);
+  } catch (error) {
+    console.error(error);
+
+    response.status(502).json({
+      error: "Could not load GitHub user",
+    });
+  }
 });
 
 module.exports = router;
