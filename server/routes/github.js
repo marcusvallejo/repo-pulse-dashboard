@@ -22,7 +22,15 @@ router.get("/user", async function (request, response) {
 
   try {
     const user = await githubService.getAuthenticatedUser();
-    response.json(user);
+
+    response.json({
+      id: user.id,
+      login: user.login,
+      name: user.name,
+      avatarUrl: user.avatar_url,
+      profileUrl: user.html_url,
+      publicRepos: user.public_repos,
+    });
   } catch (error) {
     console.error(error);
 
