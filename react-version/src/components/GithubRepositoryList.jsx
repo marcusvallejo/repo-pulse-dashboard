@@ -1,6 +1,6 @@
 import useGithubRepositories from "../hooks/useGithubRepositories";
 
-function GithubRepositoryList() {
+function GithubRepositoryList({ selectedRepository, onRepositorySelect }) {
   const { repositories, isLoading, errorMessage } = useGithubRepositories();
 
   if (isLoading) {
@@ -18,11 +18,20 @@ function GithubRepositoryList() {
       <ul>
         {repositories.map((repository) => (
           <li key={repository.id}>
-            <a href={repository.url}>{repository.fullName}</a>
+            <button
+              type="button"
+              onClick={() => onRepositorySelect(repository)}
+            >
+              {repository.fullName}
+            </button>
             {repository.private ? " private" : " public"}
           </li>
         ))}
       </ul>
+
+      {selectedRepository && (
+        <p>Selected GitHub repository: {selectedRepository.fullName}</p>
+      )}
     </section>
   );
 }

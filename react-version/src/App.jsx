@@ -12,6 +12,7 @@ function App() {
   const [repositories, setRepositories] = useState([]);
   const { repositoryData, isLoading, errorMessage, reloadRepositoryData } =
     useRepositoryData(selectedRepository);
+  const [selectedGithubRepository, setSelectedGithubRepository] = useState(null);
 
   useEffect(function () {
     async function loadRepositories() {
@@ -38,7 +39,10 @@ function App() {
       <p>This is where we will migrate the dashboard piece by piece.</p>
       <GithubStatus />
       <GithubUserProfile />
-      <GithubRepositoryList />
+      <GithubRepositoryList
+        selectedRepository={selectedGithubRepository}
+        onRepositorySelect={setSelectedGithubRepository}
+      />
 
       {isLoading && <p>Loading repository data...</p>}
       {errorMessage && <p>{errorMessage}</p>}
