@@ -105,4 +105,60 @@ describe("GitHub API routes", function () {
       },
     ]);
   });
+
+  it("returns an error when GitHub pull requests are requested without a token", async function () {
+    delete process.env.GITHUB_TOKEN;
+
+    const response = await request(app).get(
+      "/api/github/repositories/marcusvallejo/repo-pulse-dashboard/pulls"
+    );
+
+    expect(response.status).toBe(401);
+    expect(response.body).toEqual({
+      error: "GitHub token is not configured",
+    });
+  });
+
+  it("returns simplified GitHub pull requests", async function () {
+    process.env.GITHUB_TOKEN = "fake-token";
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async function () {
+          return [
+            {
+              id: 789,
+              title: "Add GitHub pull request analytics",
+              number: 4,
+              state: "open",
+              html_url:
+                "https://github.com/marcusvallejo/repo-pulse-dashboard/pull/4",
+              user: {
+                login: "marcusvallejo",
+              },
+              created_at: "2026-09-04T10:00:00Z",
+            },
+          ];
+        },
+      })
+    );
+
+    const response = await request(app).get(
+      "/api/github/repositories/marcusvallejo/repo-pulse-dashboard/pulls"
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual([
+      {
+        id: 789,
+        title: "Add GitHub pull request analytics",
+        number: 4,
+        state: "open",
+        url: "https://github.com/marcusvallejo/repo-pulse-dashboard/pull/4",
+        author: "marcusvallejo",
+        createdAt: "2026-09-04T10:00:00Z",
+      },
+    ]);
+  });
 });

@@ -68,4 +68,37 @@ router.get("/repositories", async function (request, response) {
   }
 });
 
+router.get("/repositories/:owner/:repo/pulls", async function (request, response) {
+  if (!githubService.hasGithubToken()) {
+    return sendGithubTokenNotConfigured(response);
+  }
+
+  const owner = request.params.owner;
+  const repo = request.params.repo;
+
+  try {
+    const pullRequests = await githubService.getPullRequests(owner, repo);
+
+    response.json(
+      pullRequests.map(function (pullRequest) {
+        return {
+          id: pullRequest.id,
+          title: pullRequest.title,
+          number: pullRequest.number,
+          state: pullRequest.state,
+          url: pullRequest.html_url,
+          author: pullRequest.user.login,
+          createdAt: pullRequest.created_at,
+        };
+      })
+    );
+  } catch (error) {
+    console.error(error);
+
+    response.status(502).json({
+      error: "Could not load GitHub pull requests",
+    });
+  }
+});
+
 module.exports = router;

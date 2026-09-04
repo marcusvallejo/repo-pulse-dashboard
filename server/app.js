@@ -16,6 +16,7 @@ app.get("/", function (request, response) {
       "/api/github/status",
       "/api/github/user",
       "/api/github/repositories",
+      "/api/github/repositories/:owner/:repo/pulls",
     ],
   });
 });
