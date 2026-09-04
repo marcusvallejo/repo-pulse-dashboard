@@ -28,10 +28,6 @@ function GithubRepositoryList({ selectedRepository, onRepositorySelect }) {
           </li>
         ))}
       </ul>
-
-      {selectedRepository && (
-        <p>Selected GitHub repository: {selectedRepository.fullName}</p>
-      )}
     </section>
   );
 }
