@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import fetchGithubApi from "../api/githubApi";
 
 function useGithubRepositories() {
   const [repositories, setRepositories] = useState([]);
@@ -8,14 +9,8 @@ function useGithubRepositories() {
   useEffect(function () {
     async function loadGithubRepositories() {
       try {
-        const response = await fetch("/api/github/repositories");
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.error);
-        }
-
-        setRepositories(data);
+        const repositories = await fetchGithubApi("/api/github/repositories");
+        setRepositories(repositories);
       } catch (error) {
         console.error(error);
         setErrorMessage(error.message);

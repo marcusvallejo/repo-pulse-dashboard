@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import fetchGithubApi from "../api/githubApi";
 
 function useGithubUser() {
   const [user, setUser] = useState(null);
@@ -8,14 +9,8 @@ function useGithubUser() {
   useEffect(function () {
     async function loadGithubUser() {
       try {
-        const response = await fetch("/api/github/user");
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.error);
-        }
-
-        setUser(data);
+        const user = await fetchGithubApi("/api/github/user");
+        setUser(user);
       } catch (error) {
         console.error(error);
         setErrorMessage(error.message);
