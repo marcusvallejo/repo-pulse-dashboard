@@ -8,6 +8,7 @@ import GithubUserProfile from "./components/GithubUserProfile";
 import GithubRepositoryList from "./components/GithubRepositoryList";
 import GithubRepositoryDetails from "./components/GithubRepositoryDetails";
 import GithubPullRequestList from "./components/GithubPullRequestList";
+import GithubCommitList from "./components/GithubCommitList";
 
 function App() {
   const [selectedRepository, setSelectedRepository] = useState("shopfront");
@@ -46,6 +47,7 @@ function App() {
       />
       <GithubRepositoryDetails repository={selectedGithubRepository} />
       <GithubPullRequestList repository={selectedGithubRepository} />
+      <GithubCommitList repository={selectedGithubRepository} />
 
       {isLoading && <p>Loading repository data...</p>}
       {errorMessage && <p>{errorMessage}</p>}
