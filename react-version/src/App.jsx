@@ -47,7 +47,10 @@ function App() {
       />
       <GithubRepositoryDetails repository={selectedGithubRepository} />
       <GithubPullRequestList repository={selectedGithubRepository} />
-      <GithubCommitList repository={selectedGithubRepository} />
+      <GithubCommitList
+        key={selectedGithubRepository?.id ?? "no-repository"}
+        repository={selectedGithubRepository}
+      />
 
       {isLoading && <p>Loading repository data...</p>}
       {errorMessage && <p>{errorMessage}</p>}

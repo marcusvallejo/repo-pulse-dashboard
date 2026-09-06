@@ -177,46 +177,59 @@ describe("GitHub API routes", function () {
 
   it("returns simplified GitHub commits", async function () {
     process.env.GITHUB_TOKEN = "fake-token";
-    vi.stubGlobal(
-      "fetch",
-      vi.fn().mockResolvedValue({
-        ok: true,
-        json: async function () {
-          return [
-            {
-              sha: "abc123",
-              html_url:
-                "https://github.com/marcusvallejo/repo-pulse-dashboard/commit/abc123",
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async function () {
+        return [
+          {
+            sha: "abc123",
+            html_url:
+              "https://github.com/marcusvallejo/repo-pulse-dashboard/commit/abc123",
+            author: {
+              login: "marcusvallejo",
+            },
+            commit: {
+              message: "Add GitHub commit activity",
               author: {
-                login: "marcusvallejo",
-              },
-              commit: {
-                message: "Add GitHub commit activity",
-                author: {
-                  name: "Marcus Vallejo",
-                  date: "2026-09-06T10:00:00Z",
-                },
+                name: "Marcus Vallejo",
+                date: "2026-09-06T10:00:00Z",
               },
             },
-          ];
-        },
-      })
+          },
+        ];
+      },
+    });
+
+    vi.stubGlobal(
+      "fetch",
+      fetchMock
     );
 
     const response = await request(app).get(
-      "/api/github/repositories/marcusvallejo/repo-pulse-dashboard/commits"
+      "/api/github/repositories/marcusvallejo/repo-pulse-dashboard/commits?page=2"
     );
 
     expect(response.status).toBe(200);
-    expect(response.body).toEqual([
-      {
-        sha: "abc123",
-        message: "Add GitHub commit activity",
-        url:
-          "https://github.com/marcusvallejo/repo-pulse-dashboard/commit/abc123",
-        author: "marcusvallejo",
-        createdAt: "2026-09-06T10:00:00Z",
+    expect(response.body).toEqual({
+      commits: [
+        {
+          sha: "abc123",
+          message: "Add GitHub commit activity",
+          url:
+            "https://github.com/marcusvallejo/repo-pulse-dashboard/commit/abc123",
+          author: "marcusvallejo",
+          createdAt: "2026-09-06T10:00:00Z",
+        },
+      ],
+      pagination: {
+        page: 2,
+        perPage: 10,
+        hasMore: false,
       },
-    ]);
+    });
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://api.github.com/repos/marcusvallejo/repo-pulse-dashboard/commits?per_page=10&page=2",
+      expect.any(Object)
+    );
   });
 });

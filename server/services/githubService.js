@@ -53,9 +53,9 @@ async function getPullRequests(owner, repo) {
   return response.json();
 }
 
-async function getCommits(owner, repo) {
+async function getCommits(owner, repo, page, perPage) {
   const response = await fetch(
-    `https://api.github.com/repos/${owner}/${repo}/commits`,
+    `https://api.github.com/repos/${owner}/${repo}/commits?per_page=${perPage}&page=${page}`,
     {
       headers: {
         Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,

@@ -2,6 +2,13 @@ const express = require("express");
 const githubService = require("../services/githubService");
 
 const router = express.Router();
+const COMMITS_PER_PAGE = 10;
+
+function getPageNumber(value) {
+  const page = Number(value);
+
+  return Number.isInteger(page) && page > 0 ? page : 1;
+}
 
 function sendGithubTokenNotConfigured(response) {
   return response.status(401).json({
@@ -108,12 +115,18 @@ router.get("/repositories/:owner/:repo/commits", async function (request, respon
 
   const owner = request.params.owner;
   const repo = request.params.repo;
+  const page = getPageNumber(request.query.page);
 
   try {
-    const commits = await githubService.getCommits(owner, repo);
+    const commits = await githubService.getCommits(
+      owner,
+      repo,
+      page,
+      COMMITS_PER_PAGE
+    );
 
-    response.json(
-      commits.map(function (commit) {
+    response.json({
+      commits: commits.map(function (commit) {
         return {
           sha: commit.sha,
           message: commit.commit.message,
@@ -121,8 +134,13 @@ router.get("/repositories/:owner/:repo/commits", async function (request, respon
           author: commit.author?.login || commit.commit.author.name,
           createdAt: commit.commit.author.date,
         };
-      })
-    );
+      }),
+      pagination: {
+        page,
+        perPage: COMMITS_PER_PAGE,
+        hasMore: commits.length === COMMITS_PER_PAGE,
+      },
+    });
   } catch (error) {
     console.error(error);
 
