@@ -1,6 +1,6 @@
 import useGithubRepositories from "../hooks/useGithubRepositories";
 
-function GithubRepositoryList({ selectedRepository, onRepositorySelect }) {
+function GithubRepositoryList({ onRepositorySelect }) {
   const { repositories, isLoading, errorMessage } = useGithubRepositories();
 
   if (isLoading) {

@@ -42,7 +42,6 @@ function App() {
       <GithubStatus />
       <GithubUserProfile />
       <GithubRepositoryList
-        selectedRepository={selectedGithubRepository}
         onRepositorySelect={setSelectedGithubRepository}
       />
       <GithubRepositoryDetails repository={selectedGithubRepository} />

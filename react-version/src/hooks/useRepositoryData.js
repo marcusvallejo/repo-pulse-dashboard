@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 const REPOSITORY_DATA_URL = "/api/repositories";
 
@@ -17,32 +17,40 @@ function useRepositoryData(selectedRepository) {
   const [isLoading, setIsLoading] = useState(true);
   const [repositoryData, setRepositoryData] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
+  const [refreshCount, setRefreshCount] = useState(0);
 
-  const loadRepositoryData = useCallback(async function () {
-    try {
-      setIsLoading(true);
-      setErrorMessage("");
-      setRepositoryData(null);
+  useEffect(
+    function () {
+      async function loadRepositoryData() {
+        try {
+          setIsLoading(true);
+          setErrorMessage("");
+          setRepositoryData(null);
 
-      const data = await fetchRepositoryData(selectedRepository);
-      setRepositoryData(data);
-    } catch (error) {
-      console.error(error);
-      setErrorMessage(error.message);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [selectedRepository]);
+          const data = await fetchRepositoryData(selectedRepository);
+          setRepositoryData(data);
+        } catch (error) {
+          console.error(error);
+          setErrorMessage(error.message);
+        } finally {
+          setIsLoading(false);
+        }
+      }
 
-  useEffect(function () {
-    loadRepositoryData();
-  }, [loadRepositoryData]);
+      loadRepositoryData();
+    },
+    [selectedRepository, refreshCount]
+  );
+
+  function reloadRepositoryData() {
+    setRefreshCount((currentCount) => currentCount + 1);
+  }
 
   return {
     repositoryData,
     isLoading,
     errorMessage,
-    reloadRepositoryData: loadRepositoryData,
+    reloadRepositoryData,
   };
 }
 

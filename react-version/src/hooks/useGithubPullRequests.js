@@ -8,7 +8,6 @@ function useGithubPullRequests(repository) {
 
   useEffect(function () {
     if (!repository) {
-      setPullRequests([]);
       return;
     }
 
