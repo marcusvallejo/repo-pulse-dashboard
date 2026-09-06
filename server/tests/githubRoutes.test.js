@@ -161,4 +161,62 @@ describe("GitHub API routes", function () {
       },
     ]);
   });
+
+  it("returns an error when GitHub commits are requested without a token", async function () {
+    delete process.env.GITHUB_TOKEN;
+
+    const response = await request(app).get(
+      "/api/github/repositories/marcusvallejo/repo-pulse-dashboard/commits"
+    );
+
+    expect(response.status).toBe(401);
+    expect(response.body).toEqual({
+      error: "GitHub token is not configured",
+    });
+  });
+
+  it("returns simplified GitHub commits", async function () {
+    process.env.GITHUB_TOKEN = "fake-token";
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async function () {
+          return [
+            {
+              sha: "abc123",
+              html_url:
+                "https://github.com/marcusvallejo/repo-pulse-dashboard/commit/abc123",
+              author: {
+                login: "marcusvallejo",
+              },
+              commit: {
+                message: "Add GitHub commit activity",
+                author: {
+                  name: "Marcus Vallejo",
+                  date: "2026-09-06T10:00:00Z",
+                },
+              },
+            },
+          ];
+        },
+      })
+    );
+
+    const response = await request(app).get(
+      "/api/github/repositories/marcusvallejo/repo-pulse-dashboard/commits"
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual([
+      {
+        sha: "abc123",
+        message: "Add GitHub commit activity",
+        url:
+          "https://github.com/marcusvallejo/repo-pulse-dashboard/commit/abc123",
+        author: "marcusvallejo",
+        createdAt: "2026-09-06T10:00:00Z",
+      },
+    ]);
+  });
 });

@@ -101,4 +101,35 @@ router.get("/repositories/:owner/:repo/pulls", async function (request, response
   }
 });
 
+router.get("/repositories/:owner/:repo/commits", async function (request, response) {
+  if (!githubService.hasGithubToken()) {
+    return sendGithubTokenNotConfigured(response);
+  }
+
+  const owner = request.params.owner;
+  const repo = request.params.repo;
+
+  try {
+    const commits = await githubService.getCommits(owner, repo);
+
+    response.json(
+      commits.map(function (commit) {
+        return {
+          sha: commit.sha,
+          message: commit.commit.message,
+          url: commit.html_url,
+          author: commit.author?.login || commit.commit.author.name,
+          createdAt: commit.commit.author.date,
+        };
+      })
+    );
+  } catch (error) {
+    console.error(error);
+
+    response.status(502).json({
+      error: "Could not load GitHub commits",
+    });
+  }
+});
+
 module.exports = router;
