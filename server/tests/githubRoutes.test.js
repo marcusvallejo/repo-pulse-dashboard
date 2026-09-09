@@ -232,4 +232,69 @@ describe("GitHub API routes", function () {
       expect.any(Object)
     );
   });
+
+  it("returns an error when GitHub analytics are requested without a token", async function () {
+    delete process.env.GITHUB_TOKEN;
+
+    const response = await request(app).get(
+      "/api/github/repositories/marcusvallejo/repo-pulse-dashboard/analytics"
+    );
+
+    expect(response.status).toBe(401);
+    expect(response.body).toEqual({
+      error: "GitHub token is not configured",
+    });
+  });
+
+  it("returns calculated GitHub repository analytics", async function () {
+    process.env.GITHUB_TOKEN = "fake-token";
+
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation(async function (url) {
+        if (url.includes("pulls?state=open")) {
+          return {
+            ok: true,
+            json: async function () {
+              return [{ created_at: "2000-01-01T00:00:00Z" }];
+            },
+          };
+        }
+
+        if (url.includes("pulls?state=closed")) {
+          return {
+            ok: true,
+            json: async function () {
+              return [];
+            },
+          };
+        }
+
+        if (url.includes("/commits?")) {
+          return {
+            ok: true,
+            json: async function () {
+              return [{ sha: "abc123" }];
+            },
+          };
+        }
+
+        throw new Error(`Unexpected GitHub URL: ${url}`);
+      })
+    );
+
+    const response = await request(app).get(
+      "/api/github/repositories/marcusvallejo/repo-pulse-dashboard/analytics"
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual({
+      openPullRequests: 1,
+      stalePullRequests: 1,
+      commitsLast30Days: 1,
+      averageMergeTimeDays: null,
+      windowDays: 30,
+      staleAfterDays: 7,
+    });
+  });
 });

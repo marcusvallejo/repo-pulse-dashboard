@@ -9,6 +9,7 @@ import GithubRepositoryList from "./components/GithubRepositoryList";
 import GithubRepositoryDetails from "./components/GithubRepositoryDetails";
 import GithubPullRequestList from "./components/GithubPullRequestList";
 import GithubCommitList from "./components/GithubCommitList";
+import GithubAnalyticsSummary from "./components/GithubAnalyticsSummary";
 
 function App() {
   const [selectedRepository, setSelectedRepository] = useState("shopfront");
@@ -46,6 +47,10 @@ function App() {
         onRepositorySelect={setSelectedGithubRepository}
       />
       <GithubRepositoryDetails repository={selectedGithubRepository} />
+      <GithubAnalyticsSummary
+        key={`analytics-${selectedGithubRepository?.id ?? "none"}`}
+        repository={selectedGithubRepository}
+      />
       <GithubPullRequestList repository={selectedGithubRepository} />
       <GithubCommitList
         key={selectedGithubRepository?.id ?? "no-repository"}

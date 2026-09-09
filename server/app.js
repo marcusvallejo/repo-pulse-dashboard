@@ -18,6 +18,7 @@ app.get("/", function (request, response) {
       "/api/github/repositories",
       "/api/github/repositories/:owner/:repo/pulls",
       "/api/github/repositories/:owner/:repo/commits?page=1",
+      "/api/github/repositories/:owner/:repo/analytics",
     ],
   });
 });

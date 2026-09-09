@@ -1,5 +1,6 @@
 const express = require("express");
 const githubService = require("../services/githubService");
+const githubAnalyticsService = require("../services/githubAnalyticsService");
 
 const router = express.Router();
 const COMMITS_PER_PAGE = 10;
@@ -149,5 +150,32 @@ router.get("/repositories/:owner/:repo/commits", async function (request, respon
     });
   }
 });
+
+router.get(
+  "/repositories/:owner/:repo/analytics",
+  async function (request, response) {
+    if (!githubService.hasGithubToken()) {
+      return sendGithubTokenNotConfigured(response);
+    }
+
+    const owner = request.params.owner;
+    const repo = request.params.repo;
+
+    try {
+      const analytics = await githubAnalyticsService.getRepositoryAnalytics(
+        owner,
+        repo
+      );
+
+      response.json(analytics);
+    } catch (error) {
+      console.error(error);
+
+      response.status(502).json({
+        error: "Could not calculate GitHub repository analytics",
+      });
+    }
+  }
+);
 
 module.exports = router;

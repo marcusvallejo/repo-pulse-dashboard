@@ -34,9 +34,12 @@ async function getRepositories() {
   return response.json();
 }
 
-async function getPullRequests(owner, repo) {
+async function getPullRequests(owner, repo, state, perPage) {
+  const query =
+    state && perPage ? `?state=${state}&per_page=${perPage}` : "";
+
   const response = await fetch(
-    `https://api.github.com/repos/${owner}/${repo}/pulls`,
+    `https://api.github.com/repos/${owner}/${repo}/pulls${query}`,
     {
       headers: {
         Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
@@ -53,9 +56,11 @@ async function getPullRequests(owner, repo) {
   return response.json();
 }
 
-async function getCommits(owner, repo, page, perPage) {
+async function getCommits(owner, repo, page, perPage, since) {
+  const sinceQuery = since ? `&since=${encodeURIComponent(since)}` : "";
+
   const response = await fetch(
-    `https://api.github.com/repos/${owner}/${repo}/commits?per_page=${perPage}&page=${page}`,
+    `https://api.github.com/repos/${owner}/${repo}/commits?per_page=${perPage}&page=${page}${sinceQuery}`,
     {
       headers: {
         Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
