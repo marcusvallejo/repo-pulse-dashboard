@@ -295,6 +295,19 @@ describe("GitHub API routes", function () {
       averageMergeTimeDays: null,
       windowDays: 30,
       staleAfterDays: 7,
+      healthScore: 85,
+      recommendations: [
+        {
+          priority: "high",
+          title: "Review stale pull requests",
+          message: "1 pull request has been open longer than 7 days.",
+        },
+        {
+          priority: "medium",
+          title: "Increase repository activity",
+          message: "Only 1 commit was made during the last 30 days.",
+        },
+      ],
     });
   });
 });

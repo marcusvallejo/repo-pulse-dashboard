@@ -1,5 +1,6 @@
 import useGithubAnalytics from "../hooks/useGithubAnalytics";
 import MetricGrid from "./MetricGrid";
+import GithubRecommendations from "./GithubRecommendations";
 
 function GithubAnalyticsSummary({ repository }) {
   const { analytics, isLoading, errorMessage } =
@@ -42,12 +43,20 @@ function GithubAnalyticsSummary({ repository }) {
       value: analytics.commitsLast30Days,
       note: `During the last ${analytics.windowDays} days`,
     },
+    {
+      label: "Health score",
+      value: analytics.healthScore,
+      note: "Out of 100",
+    },
   ];
 
   return (
     <div>
       <h2>Live repository analytics</h2>
       <MetricGrid metrics={metrics} />
+      <GithubRecommendations
+        recommendations={analytics.recommendations}
+      />
     </div>
   );
 }
