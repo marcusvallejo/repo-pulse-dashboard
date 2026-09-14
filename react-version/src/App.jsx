@@ -1,8 +1,4 @@
-import { useEffect, useState } from "react";
-import RepositorySelector from "./components/RepositorySelector";
-import useRepositoryData from "./hooks/useRepositoryData";
-import RefreshButton from "./components/RefreshButton";
-import DashboardSections from "./components/DashboardSections";
+import { useState } from "react";
 import GithubStatus from "./components/GithubStatus";
 import GithubUserProfile from "./components/GithubUserProfile";
 import GithubRepositoryList from "./components/GithubRepositoryList";
@@ -12,40 +8,20 @@ import GithubCommitList from "./components/GithubCommitList";
 import GithubAnalyticsSummary from "./components/GithubAnalyticsSummary";
 
 function App() {
-  const [selectedRepository, setSelectedRepository] = useState("shopfront");
-  const [repositories, setRepositories] = useState([]);
-  const { repositoryData, isLoading, errorMessage, reloadRepositoryData } =
-    useRepositoryData(selectedRepository);
   const [selectedGithubRepository, setSelectedGithubRepository] = useState(null);
-
-  useEffect(function () {
-    async function loadRepositories() {
-      try {
-        const response = await fetch("/api/repositories");
-        const data = await response.json();
-
-        setRepositories(Object.keys(data));
-      } catch (error) {
-        console.error(error);
-      }
-    }
-
-    loadRepositories();
-  }, []);
-
-  const metrics = repositoryData?.metrics ?? [];
-  const pullRequests = repositoryData?.pullRequests ?? [];
-  const activity = repositoryData?.activity ?? [];
 
   return (
     <main>
-      <h1>RepoPulse React Version</h1>
-      <p>This is where we will migrate the dashboard piece by piece.</p>
+      <h1>RepoPulse</h1>
+      <p>Live GitHub code review and repository analytics.</p>
       <GithubStatus />
       <GithubUserProfile />
       <GithubRepositoryList
         onRepositorySelect={setSelectedGithubRepository}
       />
+      {!selectedGithubRepository && (
+        <p>Select a GitHub repository to view its analytics.</p>
+      )}
       <GithubRepositoryDetails repository={selectedGithubRepository} />
       <GithubAnalyticsSummary
         key={`analytics-${selectedGithubRepository?.id ?? "none"}`}
@@ -55,26 +31,6 @@ function App() {
       <GithubCommitList
         key={selectedGithubRepository?.id ?? "no-repository"}
         repository={selectedGithubRepository}
-      />
-
-      {isLoading && <p>Loading repository data...</p>}
-      {errorMessage && <p>{errorMessage}</p>}
-
-      <RefreshButton
-        isLoading={isLoading}
-        onRefresh={reloadRepositoryData}
-      />
-
-      <RepositorySelector
-        repositories={repositories}
-        selectedRepository={selectedRepository}
-        onRepositoryChange={setSelectedRepository}
-      />
-
-      <DashboardSections
-        metrics={metrics}
-        pullRequests={pullRequests}
-        activity={activity}
       />
     </main>
   );

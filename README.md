@@ -4,16 +4,16 @@ RepoPulse is a GitHub code review and repository analytics dashboard. It brings 
 
 ## Features
 
-- Repository health overview
-- Pull request risk and review-status signals
-- Commit activity visualization
-- Code-quality indicators
-- Prioritized improvement recommendations
-- Responsive dark editorial interface
+- GitHub profile and repository discovery
+- Live pull request and paginated commit data
+- 30-day repository activity metrics
+- Rule-based repository health score
+- Prioritized workflow recommendations
+- Automated API and analytics tests
 
 ## Current Status
 
-RepoPulse currently has a React frontend and an Express backend powered by representative sample repository data. GitHub authentication and live repository analytics are planned for a future release.
+RepoPulse has a React frontend and an Express backend connected to the GitHub REST API. It currently loads live repository data, calculates review and activity metrics, and generates health recommendations. GitHub OAuth, historical snapshots, deployment, and the final dashboard design remain in development.
 
 ## Run Locally
 
@@ -26,6 +26,8 @@ cd repo-pulse-dashboard
 
 The original static prototype can still be opened with `index.html`.
 
+Create `server/.env` from `server/.env.example` and add a GitHub token. Keep this file private.
+
 ## Backend API
 
 The Express backend lives in `server`.
@@ -34,6 +36,7 @@ The Express backend lives in `server`.
 
 ```powershell
 cd server
+npm install
 npm run dev
 ```
 
@@ -48,25 +51,40 @@ npm run smoke-test
 
 - `GET /`
 - `GET /api/health`
-- `GET /api/repositories`
-- `GET /api/repositories/:repositoryId`
-- `GET /api/repositories/:repositoryId/summary`
+- `GET /api/github/status`
+- `GET /api/github/user`
+- `GET /api/github/repositories`
+- `GET /api/github/repositories/:owner/:repo/pulls`
+- `GET /api/github/repositories/:owner/:repo/commits?page=1`
+- `GET /api/github/repositories/:owner/:repo/analytics`
+
+## React Frontend
+
+Run the Vite frontend in a second terminal:
+
+```powershell
+cd react-version
+npm install
+npm run dev
+```
+
+The development server runs at `http://localhost:5173` and proxies API requests to the Express server on port `4000`.
 
 ## Verification
 
-Run the static prototype smoke test from the project root:
+With the backend running, run its smoke test from the `server` directory:
 
 ```bash
-node scripts/smoke-test.js
+npm run smoke-test
 ```
 
 ## Roadmap
 
 - GitHub OAuth authentication
-- Repository selection
-- Live pull request and commit data
 - Historical repository snapshots
-- Rule-based health recommendations
+- Frontend component tests
+- Final responsive dashboard design
+- Production deployment and CI
 
 ## License
 

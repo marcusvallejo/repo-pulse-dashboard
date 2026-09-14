@@ -23,39 +23,11 @@ const checks = [
     },
   },
   {
-    name: "repository detail route",
-    path: "/api/repositories/shopfront",
+    name: "GitHub status route",
+    path: "/api/github/status",
     expectedStatus: 200,
     validate: function (data) {
-      return (
-        Array.isArray(data.metrics) &&
-        Array.isArray(data.pullRequests) &&
-        Array.isArray(data.activity)
-      );
-    },
-  },
-  {
-    name: "repository summary route",
-    path: "/api/repositories/shopfront/summary",
-    expectedStatus: 200,
-    validate: function (data) {
-      return (
-        data.id === "shopfront" &&
-        data.openPullRequests !== undefined &&
-        data.commits !== undefined &&
-        data.healthScore !== undefined
-      );
-    },
-  },
-  {
-    name: "missing repository route",
-    path: "/api/repositories/not-real",
-    expectedStatus: 404,
-    validate: function (data) {
-      return (
-        data.error === "Repository not found" &&
-        Array.isArray(data.availableRepositories)
-      );
+      return typeof data.configured === "boolean";
     },
   },
 ];
