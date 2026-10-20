@@ -1,6 +1,7 @@
 import useGithubAnalytics from "../hooks/useGithubAnalytics";
 import MetricGrid from "./MetricGrid";
 import GithubRecommendations from "./GithubRecommendations";
+import GithubCommitActivity from "./GithubCommitActivity";
 
 function GithubAnalyticsSummary({ repository }) {
   const { analytics, isLoading, errorMessage } =
@@ -41,7 +42,9 @@ function GithubAnalyticsSummary({ repository }) {
     {
       label: "Commits",
       value: analytics.commitsLast30Days,
-      note: `During the last ${analytics.windowDays} days`,
+      note: analytics.commitActivityMayBeIncomplete
+        ? `Latest ${analytics.commitFetchLimit} fetched commits; may be incomplete`
+        : `Last ${analytics.windowDays} UTC calendar days`,
     },
     {
       label: "Health score",
@@ -54,6 +57,11 @@ function GithubAnalyticsSummary({ repository }) {
     <div>
       <h2>Live repository analytics</h2>
       <MetricGrid metrics={metrics} />
+      <GithubCommitActivity
+        days={analytics.dailyCommits}
+        mayBeIncomplete={analytics.commitActivityMayBeIncomplete}
+        fetchLimit={analytics.commitFetchLimit}
+      />
       <GithubRecommendations
         recommendations={analytics.recommendations}
       />

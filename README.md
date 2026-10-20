@@ -7,6 +7,7 @@ RepoPulse is a GitHub code review and repository analytics dashboard. It brings 
 - GitHub profile and repository discovery
 - Live pull request and paginated commit data
 - 30-day repository activity metrics
+- Daily commit-activity chart with UTC dates and accessible daily counts
 - Rule-based repository health score
 - Prioritized workflow recommendations
 - Automated API and analytics tests
@@ -77,6 +78,12 @@ With the backend running, run its smoke test from the `server` directory:
 ```bash
 npm run smoke-test
 ```
+
+## Analytics Scope
+
+Commit activity covers 30 UTC calendar days including today, on the default branch.
+Analytics currently fetch up to 100 commits. A notice appears when that limit is
+reached because earlier activity may be missing.
 
 ## Roadmap
 

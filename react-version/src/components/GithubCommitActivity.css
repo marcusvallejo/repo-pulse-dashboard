@@ -1,0 +1,72 @@
+.commit-activity {
+  margin: 32px auto;
+  padding: 0 16px;
+  max-width: 800px;
+  text-align: left;
+  letter-spacing: 0;
+}
+
+.commit-activity p {
+  margin-bottom: 12px;
+}
+
+.commit-activity__scroll {
+  overflow-x: auto;
+  margin: 20px 0;
+}
+
+.commit-activity__plot {
+  display: grid;
+  grid-template-columns: repeat(30, minmax(8px, 1fr));
+  gap: 4px;
+  height: 180px;
+  min-width: 360px;
+  border-bottom: 1px solid var(--text);
+}
+
+.commit-activity__column,
+.commit-activity__track {
+  height: 100%;
+  min-width: 0;
+}
+
+.commit-activity__track {
+  display: flex;
+  align-items: flex-end;
+}
+
+.commit-activity__bar {
+  width: 100%;
+  background: var(--text-h);
+  border-radius: 2px 2px 0 0;
+}
+
+.commit-activity__dates {
+  display: flex;
+  justify-content: space-between;
+  min-width: 360px;
+  padding-top: 8px;
+  font-size: 14px;
+}
+
+.commit-activity summary {
+  cursor: pointer;
+}
+
+.commit-activity summary:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 4px;
+}
+
+.commit-activity table {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+.commit-activity th,
+.commit-activity td {
+  padding: 6px 8px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}

@@ -5,6 +5,36 @@ const ANALYTICS_WINDOW_DAYS = 30;
 const STALE_PULL_REQUEST_DAYS = 7;
 const ANALYTICS_PAGE_SIZE = 100;
 
+function getWindowStart(currentDate) {
+  const windowStart = new Date(currentDate);
+  windowStart.setUTCHours(0, 0, 0, 0);
+  windowStart.setUTCDate(windowStart.getUTCDate() - ANALYTICS_WINDOW_DAYS + 1);
+  return windowStart;
+}
+
+function buildDailyCommits(commits, currentDate) {
+  const windowStart = getWindowStart(currentDate);
+  const dailyCommits = Array.from({ length: ANALYTICS_WINDOW_DAYS }, function (_, index) {
+    return {
+      date: new Date(windowStart.getTime() + index * DAY_IN_MS).toISOString().slice(0, 10),
+      count: 0,
+    };
+  });
+
+  for (const commit of commits) {
+    // GitHub filters commit history by committer date; older fixtures may only have an author date.
+    const timestamp = commit.commit?.committer?.date ?? commit.commit?.author?.date;
+    const date = new Date(timestamp);
+    if (!Number.isFinite(date.getTime()) || date < windowStart || date > currentDate) {
+      continue;
+    }
+    const index = Math.floor((date - windowStart) / DAY_IN_MS);
+    dailyCommits[index].count += 1;
+  }
+
+  return dailyCommits;
+}
+
 function getAverageMergeTimeDays(pullRequests, windowStart) {
   const recentlyMergedPullRequests = pullRequests.filter(function (pullRequest) {
     return (
@@ -127,9 +157,7 @@ function buildRepositoryAnalytics(
   commits,
   currentDate = new Date()
 ) {
-  const windowStart = new Date(
-    currentDate.getTime() - ANALYTICS_WINDOW_DAYS * DAY_IN_MS
-  );
+  const windowStart = getWindowStart(currentDate);
   const staleThreshold = new Date(
     currentDate.getTime() - STALE_PULL_REQUEST_DAYS * DAY_IN_MS
   );
@@ -138,10 +166,11 @@ function buildRepositoryAnalytics(
     return new Date(pullRequest.created_at) < staleThreshold;
   });
 
+  const dailyCommits = buildDailyCommits(commits, currentDate);
   const analytics = {
     openPullRequests: openPullRequests.length,
     stalePullRequests: stalePullRequests.length,
-    commitsLast30Days: commits.length,
+    commitsLast30Days: dailyCommits.reduce((total, day) => total + day.count, 0),
     averageMergeTimeDays: getAverageMergeTimeDays(
       closedPullRequests,
       windowStart
@@ -152,6 +181,9 @@ function buildRepositoryAnalytics(
 
   return {
     ...analytics,
+    dailyCommits,
+    commitActivityMayBeIncomplete: commits.length >= ANALYTICS_PAGE_SIZE,
+    commitFetchLimit: ANALYTICS_PAGE_SIZE,
     healthScore: calculateHealthScore(analytics),
     recommendations: buildRecommendations(analytics),
   };
@@ -159,9 +191,7 @@ function buildRepositoryAnalytics(
 
 async function getRepositoryAnalytics(owner, repo) {
   const currentDate = new Date();
-  const windowStart = new Date(
-    currentDate.getTime() - ANALYTICS_WINDOW_DAYS * DAY_IN_MS
-  );
+  const windowStart = getWindowStart(currentDate);
 
   const [openPullRequests, closedPullRequests, commits] = await Promise.all([
     githubService.getPullRequests(
@@ -194,6 +224,7 @@ async function getRepositoryAnalytics(owner, repo) {
 }
 
 module.exports = {
+  buildDailyCommits,
   buildRepositoryAnalytics,
   buildRecommendations,
   calculateHealthScore,

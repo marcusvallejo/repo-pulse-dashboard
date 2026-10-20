@@ -274,7 +274,10 @@ describe("GitHub API routes", function () {
           return {
             ok: true,
             json: async function () {
-              return [{ sha: "abc123" }];
+              return [{
+                sha: "abc123",
+                commit: { committer: { date: new Date(Date.now() - 60000).toISOString() } },
+              }];
             },
           };
         }
@@ -295,6 +298,9 @@ describe("GitHub API routes", function () {
       averageMergeTimeDays: null,
       windowDays: 30,
       staleAfterDays: 7,
+      dailyCommits: expect.any(Array),
+      commitActivityMayBeIncomplete: false,
+      commitFetchLimit: 100,
       healthScore: 85,
       recommendations: [
         {

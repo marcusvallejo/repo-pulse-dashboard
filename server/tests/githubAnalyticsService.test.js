@@ -22,7 +22,10 @@ describe("githubAnalyticsService", function () {
         merged_at: "2026-08-01T12:00:00Z",
       },
     ];
-    const commits = [{ sha: "one" }, { sha: "two" }, { sha: "three" }];
+    const commits = ["one", "two", "three"].map((sha) => ({
+      sha,
+      commit: { committer: { date: "2026-09-07T10:00:00Z" } },
+    }));
 
     const analytics = githubAnalyticsService.buildRepositoryAnalytics(
       openPullRequests,
@@ -38,6 +41,9 @@ describe("githubAnalyticsService", function () {
       averageMergeTimeDays: 6,
       windowDays: 30,
       staleAfterDays: 7,
+      dailyCommits: expect.any(Array),
+      commitActivityMayBeIncomplete: false,
+      commitFetchLimit: 100,
       healthScore: 75,
       recommendations: [
         {
@@ -57,6 +63,47 @@ describe("githubAnalyticsService", function () {
         },
       ],
     });
+  });
+
+  it("fills 30 UTC days, groups timezone offsets, and excludes invalid or out-of-window dates", function () {
+    const commits = [
+      "2026-08-09T00:00:00Z",
+      "2026-09-06T23:30:00-01:00",
+      "2026-09-07T11:00:00Z",
+      "2026-08-08T23:59:59Z",
+      "2026-09-07T13:00:00Z",
+      "invalid",
+    ].map((date) => ({ commit: { committer: { date } } }));
+    commits.push({ sha: "missing-date" });
+    const days = githubAnalyticsService.buildDailyCommits(
+      commits, new Date("2026-09-07T12:00:00Z")
+    );
+
+    expect(days).toHaveLength(30);
+    expect(days[0]).toEqual({ date: "2026-08-09", count: 1 });
+    expect(days[1]).toEqual({ date: "2026-08-10", count: 0 });
+    expect(days[29]).toEqual({ date: "2026-09-07", count: 2 });
+    expect(days.reduce((total, day) => total + day.count, 0)).toBe(3);
+  });
+
+  it("keeps zero days across leap day and year boundaries", function () {
+    const leapDays = githubAnalyticsService.buildDailyCommits([], new Date("2024-03-01T12:00:00Z"));
+    expect(leapDays).toContainEqual({ date: "2024-02-29", count: 0 });
+    const yearDays = githubAnalyticsService.buildDailyCommits([], new Date("2026-01-02T12:00:00Z"));
+    expect(yearDays[0]).toEqual({ date: "2025-12-04", count: 0 });
+    expect(yearDays[29]).toEqual({ date: "2026-01-02", count: 0 });
+  });
+
+  it("marks activity as potentially incomplete when the fetch limit is reached", function () {
+    const commits = Array.from({ length: 100 }, () => ({
+      commit: { committer: { date: "2026-09-07T10:00:00Z" } },
+    }));
+    const analytics = githubAnalyticsService.buildRepositoryAnalytics(
+      [], [], commits, new Date("2026-09-07T12:00:00Z")
+    );
+    expect(analytics.commitActivityMayBeIncomplete).toBe(true);
+    expect(analytics.commitsLast30Days).toBe(100);
+    expect(analytics.dailyCommits[29].count).toBe(100);
   });
 
   it("deducts points for stale pull requests", function () {
