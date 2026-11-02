@@ -1,6 +1,7 @@
 const express = require("express");
 const githubService = require("../services/githubService");
 const githubAnalyticsService = require("../services/githubAnalyticsService");
+const { requireGithubSession } = require("../middleware/session");
 
 const router = express.Router();
 const COMMITS_PER_PAGE = 10;
@@ -11,25 +12,25 @@ function getPageNumber(value) {
   return Number.isInteger(page) && page > 0 ? page : 1;
 }
 
-function sendGithubTokenNotConfigured(response) {
-  return response.status(401).json({
-    error: "GitHub token is not configured",
-  });
+function sendGithubError(request, response, error, message) {
+  if (error.status === 401) {
+    delete request.session.auth;
+    return response.status(401).json({ error: "GitHub login expired or was revoked. Sign in again." });
+  }
+  response.status(502).json({ error: message });
 }
 
 router.get("/status", function (request, response) {
   response.json({
-    configured: githubService.hasGithubToken(),
+    authenticated: Boolean(request.session.auth),
   });
 });
 
-router.get("/user", async function (request, response) {
-  if (!githubService.hasGithubToken()) {
-    return sendGithubTokenNotConfigured(response);
-  }
+router.use(requireGithubSession);
 
+router.get("/user", async function (request, response) {
   try {
-    const user = await githubService.getAuthenticatedUser();
+    const user = await githubService.getAuthenticatedUser(request.session.auth.accessToken);
 
     response.json({
       id: user.id,
@@ -40,21 +41,13 @@ router.get("/user", async function (request, response) {
       publicRepos: user.public_repos,
     });
   } catch (error) {
-    console.error(error);
-
-    response.status(502).json({
-      error: "Could not load GitHub user",
-    });
+    sendGithubError(request, response, error, "Could not load GitHub user");
   }
 });
 
 router.get("/repositories", async function (request, response) {
-  if (!githubService.hasGithubToken()) {
-    return sendGithubTokenNotConfigured(response);
-  }
-
   try {
-    const repositories = await githubService.getRepositories();
+    const repositories = await githubService.getRepositories(request.session.auth.accessToken);
 
     response.json(
       repositories.map(function (repository) {
@@ -68,24 +61,16 @@ router.get("/repositories", async function (request, response) {
       })
     );
   } catch (error) {
-    console.error(error);
-
-    response.status(502).json({
-      error: "Could not load GitHub repositories",
-    });
+    sendGithubError(request, response, error, "Could not load GitHub repositories");
   }
 });
 
 router.get("/repositories/:owner/:repo/pulls", async function (request, response) {
-  if (!githubService.hasGithubToken()) {
-    return sendGithubTokenNotConfigured(response);
-  }
-
   const owner = request.params.owner;
   const repo = request.params.repo;
 
   try {
-    const pullRequests = await githubService.getPullRequests(owner, repo);
+    const pullRequests = await githubService.getPullRequests(request.session.auth.accessToken, owner, repo);
 
     response.json(
       pullRequests.map(function (pullRequest) {
@@ -101,25 +86,18 @@ router.get("/repositories/:owner/:repo/pulls", async function (request, response
       })
     );
   } catch (error) {
-    console.error(error);
-
-    response.status(502).json({
-      error: "Could not load GitHub pull requests",
-    });
+    sendGithubError(request, response, error, "Could not load GitHub pull requests");
   }
 });
 
 router.get("/repositories/:owner/:repo/commits", async function (request, response) {
-  if (!githubService.hasGithubToken()) {
-    return sendGithubTokenNotConfigured(response);
-  }
-
   const owner = request.params.owner;
   const repo = request.params.repo;
   const page = getPageNumber(request.query.page);
 
   try {
     const commits = await githubService.getCommits(
+      request.session.auth.accessToken,
       owner,
       repo,
       page,
@@ -143,37 +121,26 @@ router.get("/repositories/:owner/:repo/commits", async function (request, respon
       },
     });
   } catch (error) {
-    console.error(error);
-
-    response.status(502).json({
-      error: "Could not load GitHub commits",
-    });
+    sendGithubError(request, response, error, "Could not load GitHub commits");
   }
 });
 
 router.get(
   "/repositories/:owner/:repo/analytics",
   async function (request, response) {
-    if (!githubService.hasGithubToken()) {
-      return sendGithubTokenNotConfigured(response);
-    }
-
     const owner = request.params.owner;
     const repo = request.params.repo;
 
     try {
       const analytics = await githubAnalyticsService.getRepositoryAnalytics(
+        request.session.auth.accessToken,
         owner,
         repo
       );
 
       response.json(analytics);
     } catch (error) {
-      console.error(error);
-
-      response.status(502).json({
-        error: "Could not calculate GitHub repository analytics",
-      });
+      sendGithubError(request, response, error, "Could not calculate GitHub repository analytics");
     }
   }
 );

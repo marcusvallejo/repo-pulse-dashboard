@@ -1,36 +1,53 @@
 import request from "supertest";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import app from "../app";
 
 describe("GitHub API routes", function () {
-  const originalGithubToken = process.env.GITHUB_TOKEN;
+  let authenticatedAgent;
 
-  afterEach(function () {
-    process.env.GITHUB_TOKEN = originalGithubToken;
-    vi.restoreAllMocks();
+  beforeEach(async function () {
+    vi.stubEnv("GITHUB_CLIENT_ID", "test-client");
+    vi.stubEnv("GITHUB_CLIENT_SECRET", "test-secret");
+    vi.stubEnv("GITHUB_CALLBACK_URL", "http://localhost:4000/api/auth/github/callback");
+    vi.stubEnv("FRONTEND_URL", "http://localhost:5173");
+    vi.stubGlobal("fetch", vi.fn().mockImplementation(async (url) => ({
+      ok: true,
+      json: async () => url.includes("access_token")
+        ? { access_token: "visitor-token", expires_in: 28800 }
+        : { id: 456, login: "marcusvallejo" },
+    })));
+    authenticatedAgent = request.agent(app);
+    const start = await authenticatedAgent.get("/api/auth/github");
+    const state = new URL(start.headers.location).searchParams.get("state");
+    const callback = await authenticatedAgent.get("/api/auth/github/callback").query({ state, code: "example" });
+    expect(callback.status).toBe(302);
     vi.unstubAllGlobals();
   });
 
-  it("returns GitHub configuration status", async function () {
+  afterEach(function () {
+    vi.restoreAllMocks();
+    vi.unstubAllGlobals();
+    vi.unstubAllEnvs();
+  });
+
+  it("returns signed-out GitHub session status", async function () {
     const response = await request(app).get("/api/github/status");
 
     expect(response.status).toBe(200);
-    expect(response.body.configured).toEqual(expect.any(Boolean));
+    expect(response.body.authenticated).toBe(false);
   });
 
-  it("returns an error when GitHub user is requested without a token", async function () {
-    delete process.env.GITHUB_TOKEN;
+  it("returns an error when GitHub user is requested without a session", async function () {
 
     const response = await request(app).get("/api/github/user");
 
     expect(response.status).toBe(401);
     expect(response.body).toEqual({
-      error: "GitHub token is not configured",
+      error: "Sign in with GitHub to continue",
     });
   });
 
   it("returns a simplified GitHub user", async function () {
-    process.env.GITHUB_TOKEN = "fake-token";
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue({
@@ -48,7 +65,7 @@ describe("GitHub API routes", function () {
       })
     );
 
-    const response = await request(app).get("/api/github/user");
+    const response = await authenticatedAgent.get("/api/github/user");
 
     expect(response.status).toBe(200);
     expect(response.body).toEqual({
@@ -61,19 +78,17 @@ describe("GitHub API routes", function () {
     });
   });
 
-  it("returns an error when GitHub repositories are requested without a token", async function () {
-    delete process.env.GITHUB_TOKEN;
+  it("returns an error when GitHub repositories are requested without a session", async function () {
 
     const response = await request(app).get("/api/github/repositories");
 
     expect(response.status).toBe(401);
     expect(response.body).toEqual({
-      error: "GitHub token is not configured",
+      error: "Sign in with GitHub to continue",
     });
   });
 
   it("returns simplified GitHub repositories", async function () {
-    process.env.GITHUB_TOKEN = "fake-token";
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue({
@@ -92,7 +107,7 @@ describe("GitHub API routes", function () {
       })
     );
 
-    const response = await request(app).get("/api/github/repositories");
+    const response = await authenticatedAgent.get("/api/github/repositories");
 
     expect(response.status).toBe(200);
     expect(response.body).toEqual([
@@ -106,8 +121,7 @@ describe("GitHub API routes", function () {
     ]);
   });
 
-  it("returns an error when GitHub pull requests are requested without a token", async function () {
-    delete process.env.GITHUB_TOKEN;
+  it("returns an error when GitHub pull requests are requested without a session", async function () {
 
     const response = await request(app).get(
       "/api/github/repositories/marcusvallejo/repo-pulse-dashboard/pulls"
@@ -115,12 +129,11 @@ describe("GitHub API routes", function () {
 
     expect(response.status).toBe(401);
     expect(response.body).toEqual({
-      error: "GitHub token is not configured",
+      error: "Sign in with GitHub to continue",
     });
   });
 
   it("returns simplified GitHub pull requests", async function () {
-    process.env.GITHUB_TOKEN = "fake-token";
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue({
@@ -144,7 +157,7 @@ describe("GitHub API routes", function () {
       })
     );
 
-    const response = await request(app).get(
+    const response = await authenticatedAgent.get(
       "/api/github/repositories/marcusvallejo/repo-pulse-dashboard/pulls"
     );
 
@@ -162,8 +175,7 @@ describe("GitHub API routes", function () {
     ]);
   });
 
-  it("returns an error when GitHub commits are requested without a token", async function () {
-    delete process.env.GITHUB_TOKEN;
+  it("returns an error when GitHub commits are requested without a session", async function () {
 
     const response = await request(app).get(
       "/api/github/repositories/marcusvallejo/repo-pulse-dashboard/commits"
@@ -171,12 +183,11 @@ describe("GitHub API routes", function () {
 
     expect(response.status).toBe(401);
     expect(response.body).toEqual({
-      error: "GitHub token is not configured",
+      error: "Sign in with GitHub to continue",
     });
   });
 
   it("returns simplified GitHub commits", async function () {
-    process.env.GITHUB_TOKEN = "fake-token";
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
       json: async function () {
@@ -205,7 +216,7 @@ describe("GitHub API routes", function () {
       fetchMock
     );
 
-    const response = await request(app).get(
+    const response = await authenticatedAgent.get(
       "/api/github/repositories/marcusvallejo/repo-pulse-dashboard/commits?page=2"
     );
 
@@ -229,12 +240,11 @@ describe("GitHub API routes", function () {
     });
     expect(fetchMock).toHaveBeenCalledWith(
       "https://api.github.com/repos/marcusvallejo/repo-pulse-dashboard/commits?per_page=10&page=2",
-      expect.any(Object)
+      expect.objectContaining({ headers: expect.objectContaining({ Authorization: "Bearer visitor-token" }) })
     );
   });
 
-  it("returns an error when GitHub analytics are requested without a token", async function () {
-    delete process.env.GITHUB_TOKEN;
+  it("returns an error when GitHub analytics are requested without a session", async function () {
 
     const response = await request(app).get(
       "/api/github/repositories/marcusvallejo/repo-pulse-dashboard/analytics"
@@ -242,12 +252,11 @@ describe("GitHub API routes", function () {
 
     expect(response.status).toBe(401);
     expect(response.body).toEqual({
-      error: "GitHub token is not configured",
+      error: "Sign in with GitHub to continue",
     });
   });
 
   it("returns calculated GitHub repository analytics", async function () {
-    process.env.GITHUB_TOKEN = "fake-token";
 
     vi.stubGlobal(
       "fetch",
@@ -286,7 +295,7 @@ describe("GitHub API routes", function () {
       })
     );
 
-    const response = await request(app).get(
+    const response = await authenticatedAgent.get(
       "/api/github/repositories/marcusvallejo/repo-pulse-dashboard/analytics"
     );
 

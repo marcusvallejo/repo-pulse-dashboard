@@ -3,6 +3,14 @@ const REQUEST_TIMEOUT_MS = 5000;
 
 const checks = [
   {
+    name: "OAuth session route",
+    path: "/api/auth/session",
+    expectedStatus: 200,
+    validate: function (data) {
+      return data.authenticated === false && data.user === null;
+    },
+  },
+  {
     name: "root route",
     path: "/",
     expectedStatus: 200,
@@ -27,7 +35,7 @@ const checks = [
     path: "/api/github/status",
     expectedStatus: 200,
     validate: function (data) {
-      return typeof data.configured === "boolean";
+      return data.authenticated === false;
     },
   },
 ];

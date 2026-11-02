@@ -189,24 +189,27 @@ function buildRepositoryAnalytics(
   };
 }
 
-async function getRepositoryAnalytics(owner, repo) {
+async function getRepositoryAnalytics(accessToken, owner, repo) {
   const currentDate = new Date();
   const windowStart = getWindowStart(currentDate);
 
   const [openPullRequests, closedPullRequests, commits] = await Promise.all([
     githubService.getPullRequests(
+      accessToken,
       owner,
       repo,
       "open",
       ANALYTICS_PAGE_SIZE
     ),
     githubService.getPullRequests(
+      accessToken,
       owner,
       repo,
       "closed",
       ANALYTICS_PAGE_SIZE
     ),
     githubService.getCommits(
+      accessToken,
       owner,
       repo,
       1,

@@ -1,5 +1,7 @@
 const express = require("express");
 const githubRouter = require("./routes/github");
+const authRouter = require("./routes/auth");
+const { sessionMiddleware, expireSession } = require("./middleware/session");
 
 const app = express();
 
@@ -9,6 +11,10 @@ app.get("/", function (request, response) {
     status: "running",
     endpoints: [
       "/api/health",
+      "/api/auth/github",
+      "/api/auth/github/callback",
+      "/api/auth/session",
+      "/api/auth/logout",
       "/api/github/status",
       "/api/github/user",
       "/api/github/repositories",
@@ -26,6 +32,8 @@ app.get("/api/health", function (request, response) {
   });
 });
 
+app.use("/api", sessionMiddleware, expireSession);
 app.use("/api/github", githubRouter);
+app.use("/api/auth", authRouter);
 
 module.exports = app;

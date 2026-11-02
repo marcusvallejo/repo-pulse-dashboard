@@ -25,13 +25,14 @@ Local development uses the Vite frontend on port 5173 and the Express backend on
 ## Capabilities and Constraints
 
 - The active app is in react-version/ and server/, using React, Vite, Node.js, and Express.
-- The backend connects to the GitHub REST API using a server-side token. It does not yet support separate user logins through OAuth.
+- React checks the backend OAuth session before showing repository data. Local OAuth routes support login, a callback, session status, and logout. Dashboard routes use each visitor's session token; there is no environment-token fallback. Signed-out, expired, or revoked sessions cannot fetch dashboard data.
+- OAuth sessions currently live in backend memory and expire within eight hours or at token expiry, whichever comes first. Login must be repeated after expiry; automatic refresh and production session storage are not implemented.
 - Live features include profile and repository discovery, pull requests, paginated commit history, 30-day activity metrics, a daily commit-activity chart, a rule-based health score, and prioritized recommendations.
 - Commit activity uses 30 UTC calendar days including today and the default branch. It includes zero-commit days, a daily data table, and a notice when the 100-commit fetch limit may hide earlier activity.
 - The health score reflects review and activity signals. It is not a direct measurement of source-code correctness, security, or maintainability.
 - Current analytics fetch limited GitHub result sets; the dashboard must not present sampled counts as guaranteed exhaustive totals.
 - Credentials stay on the backend and must not appear in frontend code or documentation.
-- OAuth, database persistence, historical snapshots, frontend tests, production deployment, and the final responsive dashboard remain planned work.
+- Automatic OAuth token refresh, database persistence, historical snapshots, frontend tests, production deployment, and the final responsive dashboard remain planned work.
 - Preserve existing application behavior when making visual changes unless the requested feature requires a behavior change.
 
 ## Brand Commitments
