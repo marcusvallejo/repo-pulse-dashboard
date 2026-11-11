@@ -1,12 +1,14 @@
 import request from "supertest";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import app from "../app";
+import { mockUserDatabase } from "./helpers/mockUserDatabase";
 
 describe("Session-authenticated GitHub requests", function () {
   let fetchMock;
   let revokedToken;
 
   beforeEach(function () {
+    mockUserDatabase();
     vi.stubEnv("GITHUB_CLIENT_ID", "test-client");
     vi.stubEnv("GITHUB_CLIENT_SECRET", "test-secret");
     vi.stubEnv("GITHUB_CALLBACK_URL", "http://localhost:4000/api/auth/github/callback");

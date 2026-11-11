@@ -6,6 +6,7 @@ RepoPulse is a GitHub code review and repository analytics dashboard. It brings 
 
 - GitHub profile and repository discovery
 - GitHub OAuth login, per-user dashboard sessions, and sign-out
+- PostgreSQL user records updated on login without duplicate GitHub accounts
 - Live pull request and paginated commit data
 - 30-day repository activity metrics
 - Daily commit-activity chart with UTC dates and accessible daily counts
@@ -29,6 +30,52 @@ cd repo-pulse-dashboard
 The original static prototype can still be opened with `index.html`.
 
 Create `server/.env` from `server/.env.example` and add your OAuth App's client ID and secret. Keep this file private. A personal `GITHUB_TOKEN` is no longer used.
+
+## Local Database
+
+Start Docker Desktop, then run these commands from the project root:
+
+```powershell
+cd server
+npm install
+npm run db:setup
+cd ..
+docker compose --env-file server/.env up -d --wait db
+cd server
+npm run db:migrate
+```
+
+`db:setup` generates two random local database passwords and appends the settings
+to the ignored `server/.env`, preserving existing OAuth settings. It never prints
+credentials and refuses to overwrite partial database configuration.
+PostgreSQL is bound to `127.0.0.1:5433`; its data persists in a Docker volume.
+Use `docker compose --env-file server/.env stop db` from the project root to stop
+it without deleting records. Do not remove the volume when keeping your data.
+
+Migrations run with `DATABASE_ADMIN_URL`. The running app uses the separate
+`DATABASE_URL` role, which has only SELECT, INSERT, and UPDATE on `users`.
+Each SQL migration runs once and is recorded in `schema_migrations`.
+
+After starting the database and running migrations, start the backend normally.
+Successful GitHub login now saves or updates the user's identity before creating
+the session. A database failure returns a safe error instead of silently skipping
+the save. The session's `user.databaseId` is the internal UUID; `user.id` remains
+the GitHub ID.
+
+Run `npm test` in `server` for mocked unit/API tests. With PostgreSQL running and
+migrations applied, run `npm run test:db` for real upsert, concurrent-login,
+schema, and role-permission checks. The database test uses an isolated temporary
+schema and removes only that schema afterward; it does not touch saved users.
+
+### Data Exposure Boundary
+
+The users table contains only internal UUID, GitHub ID, username, display name,
+and creation/update timestamps. It does not store passwords, password hashes,
+OAuth access/refresh tokens, session IDs, or private repository data. A dump still
+reveals identities and membership. A stored ID is never accepted as proof of login.
+OAuth tokens and sessions remain in server memory and are lost on restart.
+This is not a production security guarantee: database backups, host access,
+credentials, and any future sensitive tables need separate protection.
 
 ## Backend API
 

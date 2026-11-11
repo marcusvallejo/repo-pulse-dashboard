@@ -3,9 +3,11 @@ import { createHash } from "node:crypto";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import app from "../app";
 import githubAuthService from "../services/githubAuthService";
+import { mockUserDatabase } from "./helpers/mockUserDatabase";
 
 describe("GitHub OAuth routes", function () {
   beforeEach(function () {
+    mockUserDatabase();
     vi.stubEnv("GITHUB_CLIENT_ID", "test-client");
     vi.stubEnv("GITHUB_CLIENT_SECRET", "test-secret");
     vi.stubEnv("GITHUB_CALLBACK_URL", "http://localhost:4000/api/auth/github/callback");
@@ -110,7 +112,7 @@ describe("GitHub OAuth routes", function () {
     expect(fetchMock.mock.calls[1][1].headers.Authorization).toBe("Bearer private-access-token");
 
     const status = await agent.get("/api/auth/session");
-    expect(status.body).toEqual({ authenticated: true, user: { id: 123, login: "test-user", name: "Test User" }, expiresAt: expect.any(Number) });
+    expect(status.body).toEqual({ authenticated: true, user: { id: 123, login: "test-user", name: "Test User", databaseId: "00000000-0000-4000-8000-000000000001" }, expiresAt: expect.any(Number) });
     expect(status.text).not.toContain("private-access-token");
     expect((await request(app).get("/api/auth/session")).body.authenticated).toBe(false);
     expect((await agent.get("/api/auth/github/callback").query({ state: url.searchParams.get("state"), code: "example" })).status).toBe(400);
@@ -136,6 +138,17 @@ describe("GitHub OAuth routes", function () {
     const response = await agent.get("/api/auth/github/callback").query({ state: url.searchParams.get("state"), code: "example" });
     expect(response.status).toBe(502);
     expect(response.text).not.toContain("secret upstream detail");
+    expect((await agent.get("/api/auth/session")).body.authenticated).toBe(false);
+  });
+
+  it("does not create a logged-in session when saving the user fails", async function () {
+    mockGithubLogin();
+    mockUserDatabase().mockRejectedValue(new Error("database credentials must not be exposed"));
+    const agent = request.agent(app);
+    const { url } = await startLogin(agent);
+    const response = await agent.get("/api/auth/github/callback").query({ state: url.searchParams.get("state"), code: "example" });
+    expect(response.status).toBe(503);
+    expect(response.text).not.toContain("database credentials");
     expect((await agent.get("/api/auth/session")).body.authenticated).toBe(false);
   });
 

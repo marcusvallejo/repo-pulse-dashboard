@@ -2,6 +2,7 @@ const express = require("express");
 const { randomBytes, createHash, timingSafeEqual } = require("node:crypto");
 const { promisify } = require("node:util");
 const githubAuthService = require("../services/githubAuthService");
+const userService = require("../services/userService");
 
 const router = express.Router();
 const LOGIN_LIFETIME_MS = 10 * 60 * 1000;
@@ -61,6 +62,12 @@ router.get("/github/callback", async function (request, response) {
     const config = githubAuthService.getConfig();
     const tokens = await githubAuthService.exchangeCode(request.query.code, pending.verifier);
     const user = await githubAuthService.getUser(tokens.access_token);
+    let savedUser;
+    try {
+      savedUser = await userService.saveGithubUser(user);
+    } catch {
+      return response.status(503).json({ error: "Could not save your account. Check that the database is running and migrations have been applied, then start login again." });
+    }
     const expiresIn = Number(tokens.expires_in);
     const lifetime = Number.isFinite(expiresIn) && expiresIn > 0
       ? Math.min(expiresIn * 1000, SESSION_LIFETIME_MS)
@@ -69,7 +76,7 @@ router.get("/github/callback", async function (request, response) {
     await promisify(request.session.regenerate).call(request.session);
     request.session.auth = {
       accessToken: tokens.access_token,
-      user,
+      user: { ...user, databaseId: savedUser.id },
       expiresAt: Date.now() + lifetime,
     };
     request.session.cookie.maxAge = lifetime;

@@ -27,12 +27,15 @@ Local development uses the Vite frontend on port 5173 and the Express backend on
 - The active app is in react-version/ and server/, using React, Vite, Node.js, and Express.
 - React checks the backend OAuth session before showing repository data. Local OAuth routes support login, a callback, session status, and logout. Dashboard routes use each visitor's session token; there is no environment-token fallback. Signed-out, expired, or revoked sessions cannot fetch dashboard data.
 - OAuth sessions currently live in backend memory and expire within eight hours or at token expiry, whichever comes first. Login must be repeated after expiry; automatic refresh and production session storage are not implemented.
+- Successful GitHub login saves or updates a PostgreSQL user record keyed by the immutable GitHub ID. The record holds an internal UUID, GitHub ID, username, display name, and creation/update timestamps. Sessions also carry the internal UUID as user.databaseId.
+- Assume a database dump can leak: the users table contains no passwords, password hashes, OAuth tokens, session IDs, or private repository data. Identity and membership information still carry privacy risk. Database access uses parameterized queries and a separate application role restricted to SELECT, INSERT, and UPDATE on users.
+- Local PostgreSQL runs in Docker on loopback port 5433 with a persistent volume. Schema migrations are versioned; credentials are generated into the ignored server/.env and are never printed by setup.
 - Live features include profile and repository discovery, pull requests, paginated commit history, 30-day activity metrics, a daily commit-activity chart, a rule-based health score, and prioritized recommendations.
 - Commit activity uses 30 UTC calendar days including today and the default branch. It includes zero-commit days, a daily data table, and a notice when the 100-commit fetch limit may hide earlier activity.
 - The health score reflects review and activity signals. It is not a direct measurement of source-code correctness, security, or maintainability.
 - Current analytics fetch limited GitHub result sets; the dashboard must not present sampled counts as guaranteed exhaustive totals.
 - Credentials stay on the backend and must not appear in frontend code or documentation.
-- Automatic OAuth token refresh, database persistence, historical snapshots, frontend tests, production deployment, and the final responsive dashboard remain planned work.
+- Automatic OAuth token refresh, historical snapshots, frontend tests, production deployment, and the final responsive dashboard remain planned work. User-record persistence is implemented; session persistence and secure storage of any future tokens remain separate work.
 - Preserve existing application behavior when making visual changes unless the requested feature requires a behavior change.
 
 ## Brand Commitments

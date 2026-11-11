@@ -1,0 +1,8 @@
+CREATE TABLE users (
+  id UUID PRIMARY KEY,
+  github_id BIGINT NOT NULL UNIQUE CHECK (github_id > 0),
+  github_login TEXT NOT NULL CHECK (char_length(github_login) BETWEEN 1 AND 39),
+  display_name TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
